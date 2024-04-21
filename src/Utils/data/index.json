@@ -1,0 +1,22 @@
+[
+    {
+        "Index_Name": "NIFTY 50",
+        "Index_Code": "NIFTY 50"
+    },
+    {
+        "Index_Name": "NIFTY BANK",
+        "Index_Code": "NIFTY BANK"
+    },
+    {
+        "Index_Name": "NIFTY 100",
+        "Index_Code": "NIFTY 100"
+    },
+    {
+        "Index_Name": "NIFTY IT",
+        "Index_Code": "NIFTY IT"
+    },
+    {
+        "Index_Name": "NIFTY MIDCAP",
+        "Index_Code": "NIFTY MIDCAP 50"
+    }
+]

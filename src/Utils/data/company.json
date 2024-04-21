@@ -1,0 +1,107 @@
+[
+  {
+    "Company_Name": "Reliance Industries Ltd",
+    "Company_Code": "RIL",
+    "ISIN_Code": "INE002A01018"
+  },
+  {
+    "Company_Name": "Jio Financial Services Ltd",
+    "Company_Code": "JIOFIN",
+    "ISIN_Code": "INE758E01017"
+  },
+  {
+    "Company_Name": "Hero Motocorp Ltd",
+    "Company_Code": "HEROMOTOCO",
+    "ISIN_Code": "INE158A01026"
+  },
+  {
+    "Company_Name": "Kotak Mahindra Bank Ltd",
+    "Company_Code": "KOTAKBANK",
+    "ISIN_Code": "INE237A01028"
+  },
+  {
+    "Company_Name": "HDFC Bank Ltd",
+    "Company_Code": "HDFCBANK",
+    "ISIN_Code": "INE040A01034"
+  },
+  {
+    "Company_Name": "STATE BANK OF INDIA",
+    "Company_Code": "SBIN",
+    "ISIN_Code": "INE062A01020"
+  },
+  {
+    "Company_Name": "ICICI Bank Ltd",
+    "Company_Code": "ICICIBANK",
+    "ISIN_Code": "INE090A01021"
+  },
+  {
+    "Company_Name": "Axis Bank Ltd",
+    "Company_Code": "AXISBANK",
+    "ISIN_Code": "INE238A01034"
+  },
+  {
+    "Company_Name": "IndusInd Bank Ltd",
+    "Company_Code": "INDUSINDBK",
+    "ISIN_Code": "INE095A01012"
+  },
+  {
+    "Company_Name": "IDFC First Bank Ltd",
+    "Company_Code": "IDFCFIRSTB",
+    "ISIN_Code": "INE092T01019"
+  },
+  {
+    "Company_Name": "ITC Ltd",
+    "Company_Code": "ITC",
+    "ISIN_Code": "INE154A01025"
+  },
+  {
+    "Company_Name": "InterGlobe Aviation Ltd",
+    "Company_Code": "INDIGO",
+    "ISIN_Code": "INE646L01027"
+  },
+  {
+    "Company_Name": "Infosys Ltd",
+    "Company_Code": "INFY",
+    "ISIN_Code": "INE009A01021"
+  },
+  {
+    "Company_Name": "Indian Renewable Energy Development Agency Ltd",
+    "Company_Code": "IREDA",
+    "ISIN_Code": "INE202E01016"
+  },
+  {
+    "Company_Name": "Indian Oil Corporation Ltd",
+    "Company_Code": "IOC",
+    "ISIN_Code": "INE242A01010"
+  },
+  {
+    "Company_Name": "Bajaj Finance Ltd",
+    "Company_Code": "BAJFINANCE",
+    "ISIN_Code": "INE296A01024"
+  },
+  {
+    "Company_Name": "Mahindra & Mahindra Ltd",
+    "Company_Code": "M&M",
+    "ISIN_Code": "INE101A01026"
+  },
+  {
+    "Company_Name": "Vedanta Ltd",
+    "Company_Code": "VEDL",
+    "ISIN_Code": "INE205A01025"
+  },
+  {
+    "Company_Name": "Tata Steel Ltd",
+    "Company_Code": "TATASTEEL",
+    "ISIN_Code": "INE081A01020"
+  },
+  {
+    "Company_Name": "Trent Ltd",
+    "Company_Code": "TRENT",
+    "ISIN_Code": "INE849A01020"
+  },
+  {
+    "Company_Name": "Tata Motors Ltd",
+    "Company_Code": "TATAMOTORS",
+    "ISIN_Code": "INE155A01022"
+  }
+]
