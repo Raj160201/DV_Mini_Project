@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StockLineChartContent from './StockLineChartContent';
 import StockCandleChartContent from './StockCandleChartContent';
 import StockAreaChartContent from './StockAreaChartContent';
@@ -9,13 +9,55 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp, faChartArea, faStairs } from '@fortawesome/free-solid-svg-icons';
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
 
-const StockChartContent = ({ stockCode, chartData, loading }) => {
+const StockChartContent = ({ companyIsin, stockCode }) => {
+    const [chartData, setChartData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [selectedChart, setSelectedChart] = useState('area');
+    const [selectedTime, setSelectedTime] = useState('day');
     const [selectedChartIcon, setChartIcon] = useState(faChartArea);
+
+    const today = new Date().toISOString().split('T')[0];
+    const apiHeader = "https://api.upstox.com/v2/historical-candle/NSE_EQ%7C";
+    const apiFooter = `/${selectedTime}/${today}/2000-01-01`;
+    const apiUrl = apiHeader + companyIsin + apiFooter;
+
+    useEffect(() => {
+        const fetchChartData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(apiUrl);
+                const jsonData = await response.json();
+
+                const data = jsonData.data.candles.map(candle => ({
+                    Date: new Date(candle[0]),
+                    Open: candle[1],
+                    High: candle[2],
+                    Low: candle[3],
+                    Close: candle[4]
+                }));
+
+                setLoading(false);
+                setChartData(data);
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchChartData();
+
+        return () => {
+            // Cleanup code if necessary
+        };
+    }, [apiUrl]);
 
     const handleChartChange = (chartType, chartIcon) => {
         setSelectedChart(chartType);
         setChartIcon(chartIcon);
+    };
+
+    const handleTimeChange = (timePeriod) => {
+        setSelectedTime(timePeriod);
     };
 
     return (
@@ -25,7 +67,11 @@ const StockChartContent = ({ stockCode, chartData, loading }) => {
                 <div className="col chart-col" style={{ flex: '1', maxWidth: 'max-content' }}>
                     <svg id="chart-title" width="auto" height="40%">
                         <text x="10" y="40" className="chart-title" fontSize="20px" fill="#fff" fontWeight="bold" fontFamily="sans-serif">
-                            {stockCode} &#8226; 1D &#8226; NSE
+                            {stockCode} &#8226; {selectedTime === 'day' ? 'D' :
+                                selectedTime === 'week' ? 'W' :
+                                    selectedTime === 'month' ? 'M' :
+                                        selectedTime === '1minute' ? '1m' :
+                                            selectedTime === '30minute' ? '30m' : selectedTime} &#8226; NSE
                         </text>
                     </svg>
                 </div>
@@ -47,6 +93,34 @@ const StockChartContent = ({ stockCode, chartData, loading }) => {
                             </MDBDropdownItem>
                             <MDBDropdownItem link aria-current={selectedChart === 'step area'} childTag='button' onClick={() => handleChartChange('step area', faStairs)}>
                                 <FontAwesomeIcon icon={faStairs} style={{ marginRight: '7px' }} /> Step Area
+                            </MDBDropdownItem>
+                        </MDBDropdownMenu>
+                    </MDBDropdown>
+                </div>
+                <div className="col chart-col" style={{ flex: '1', maxWidth: 'max-content', paddingTop: '15px', marginLeft: '10px' }}>
+                    <MDBDropdown>
+                        <MDBDropdownToggle size='sm'>
+                            {selectedTime === 'day' ? '1 Day' :
+                                selectedTime === 'week' ? '1 Week' :
+                                    selectedTime === 'month' ? '1 Month' :
+                                        selectedTime === '1minute' ? '1 Minute' :
+                                            selectedTime === '30minute' ? '30 Minutes' : selectedTime}
+                        </MDBDropdownToggle>
+                        <MDBDropdownMenu dark>
+                            <MDBDropdownItem link aria-current={selectedTime === '1minute'} childTag='button' onClick={() => handleTimeChange('1minute')}>
+                                1 minute
+                            </MDBDropdownItem>
+                            <MDBDropdownItem link aria-current={selectedTime === '30minute'} childTag='button' onClick={() => handleTimeChange('30minute')}>
+                                30 minutes
+                            </MDBDropdownItem>
+                            <MDBDropdownItem link aria-current={selectedTime === 'day'} childTag='button' onClick={() => handleTimeChange('day')}>
+                                1 Day
+                            </MDBDropdownItem>
+                            <MDBDropdownItem link aria-current={selectedTime === 'week'} childTag='button' onClick={() => handleTimeChange('week')}>
+                                1 Week
+                            </MDBDropdownItem>
+                            <MDBDropdownItem link aria-current={selectedTime === 'month'} childTag='button' onClick={() => handleTimeChange('month')}>
+                                1 Month
                             </MDBDropdownItem>
                         </MDBDropdownMenu>
                     </MDBDropdown>

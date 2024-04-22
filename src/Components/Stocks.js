@@ -81,7 +81,7 @@ export default function Stocks() {
                             lastDayInfo = await stockApi('NSE_EQ', ISIN_Code, '30minute', lastSecondTradingDay, lastSecondTradingDay);
                         } else if (currentTime < marketOpeningTime.getTime()) {
                             const lastSecondTradingDay = await findLastTradingDay(new Date(lastTradingDay));
-                            stockInfo = await intradayStockApi('NSE_EQ', ISIN_Code);
+                            stockInfo = await stockApi('NSE_EQ', ISIN_Code, '30minute', lastTradingDay, lastTradingDay)
                             lastDayInfo = await stockApi('NSE_EQ', ISIN_Code, '30minute', lastSecondTradingDay, lastSecondTradingDay);
                         } else if (currentTime >= marketOpeningTime.getTime() && currentTime <= marketClosingTime.getTime()) {
                             stockInfo = await intradayStockApi('NSE_EQ', ISIN_Code);
@@ -134,7 +134,8 @@ export default function Stocks() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                    width: '345px',
+                    width: '100%',
+                    maxWidth: '545px',
                     backgroundColor: '#0f141f',
                     color: '#fff',
                     border: '1px solid #555',
@@ -143,6 +144,7 @@ export default function Stocks() {
                     marginBottom: '10px'
                 }}
             />
+
 
             {isLoading ? (
                 <Loader />

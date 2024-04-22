@@ -103,5 +103,60 @@
     "Company_Name": "Tata Motors Ltd",
     "Company_Code": "TATAMOTORS",
     "ISIN_Code": "INE155A01022"
+  },
+  {
+    "Company_Name": "Tata Consultancy Services Ltd",
+    "Company_Code": "TCS",
+    "ISIN_Code": "INE467B01029"
+  },
+  {
+    "Company_Name": "Bharti Airtel Ltd",
+    "Company_Code": "BHARTIARTL",
+    "ISIN_Code": "INE397D01024"
+  },
+  {
+    "Company_Name": "Maruti Suzuki India Ltd",
+    "Company_Code": "MARUTI",
+    "ISIN_Code": "INE585B01010"
+  },
+  {
+    "Company_Name": "Nestle India Ltd",
+    "Company_Code": "NESTLEIND",
+    "ISIN_Code": "INE239A01024"
+  },
+  {
+    "Company_Name": "Titan Company Ltd",
+    "Company_Code": "TITAN",
+    "ISIN_Code": "INE280A01028"
+  },
+  {
+    "Company_Name": "Asian Paints Ltd",
+    "Company_Code": "ASIANPAINT",
+    "ISIN_Code": "INE021A01026"
+  },
+  {
+    "Company_Name": "Tech Mahindra Ltd",
+    "Company_Code": "TECHM",
+    "ISIN_Code": "INE669C01036"
+  },
+  {
+    "Company_Name": "Sun Pharmaceutical Industries Ltd",
+    "Company_Code": "SUNPHARMA",
+    "ISIN_Code": "INE044A01036"
+  },
+  {
+    "Company_Name": "Power Grid Corporation of India Ltd",
+    "Company_Code": "POWERGRID",
+    "ISIN_Code": "INE752E01010"
+  },
+  {
+    "Company_Name": "NTPC Ltd",
+    "Company_Code": "NTPC",
+    "ISIN_Code": "INE733E01010"
+  },
+  {
+    "Company_Name": "Larsen & Toubro Ltd",
+    "Company_Code": "LT",
+    "ISIN_Code": "INE018A01030"
   }
 ]
