@@ -3,6 +3,7 @@ import StockLineChartContent from './StockLineChartContent';
 import StockCandleChartContent from './StockCandleChartContent';
 import StockAreaChartContent from './StockAreaChartContent';
 import StockStepChartContent from './StockStepChartContent';
+import StockHLCChartContent from './StockHLCChartContent';
 import Loader from './Loader';
 import { MDBDropdown, MDBDropdownMenu, MDBDropdownToggle, MDBDropdownItem } from 'mdb-react-ui-kit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -94,6 +95,9 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                             <MDBDropdownItem link aria-current={selectedChart === 'step area'} childTag='button' onClick={() => handleChartChange('step area', faStairs)}>
                                 <FontAwesomeIcon icon={faStairs} style={{ marginRight: '7px' }} /> Step Area
                             </MDBDropdownItem>
+                            <MDBDropdownItem link aria-current={selectedChart === 'hlc area'} childTag='button' onClick={() => handleChartChange('hlc area', faStairs)}>
+                                <FontAwesomeIcon icon={faStairs} style={{ marginRight: '7px' }} /> HLC Area
+                            </MDBDropdownItem>
                         </MDBDropdownMenu>
                     </MDBDropdown>
                 </div>
@@ -131,6 +135,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
             {selectedChart === 'line' && <StockLineChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
             {selectedChart === 'candles' && <StockCandleChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
             {selectedChart === 'step area' && <StockStepChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
+            {selectedChart === 'hlc area' && <StockHLCChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
         </>
     );
 };
