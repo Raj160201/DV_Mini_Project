@@ -1,39 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import * as d3 from 'd3';
 import { sliderBottom } from 'd3-simple-slider';
-import Loader from './Loader';
-import { MDBDropdown, MDBDropdownMenu, MDBDropdownToggle, MDBDropdownItem } from 'mdb-react-ui-kit';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp, faChartSimple } from '@fortawesome/free-solid-svg-icons';
 
-export default function StockChart({ stockCode, apiUrl }) {
-    const [loading, setLoading] = useState(true);
-
+const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
     useEffect(() => {
-        const fetchChartData = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(apiUrl);
-                const jsonData = await response.json();
-
-                const data = jsonData.data.candles.map(candle => ({
-                    Date: new Date(candle[0]),
-                    Close: candle[4]
-                }));
-
-                setLoading(false);
-                return data;
-            } catch (error) {
-                console.error('Error fetching chart data:', error);
-                setLoading(false);
-                return null;
-            }
-        };
-
         const renderChart = async () => {
+            d3.select("#chart-container").select("svg").remove();
+            d3.select("#slider-range").select("svg").remove();
+
             const margin = { top: 40, right: 68, bottom: 40, left: 10 };
             const width = 1080 - margin.left - margin.right;
-            const height = 670 - margin.top - margin.bottom;
+            const height = 720 - margin.top - margin.bottom;
 
             const x = d3.scaleTime().range([0, width]);
             const y = d3.scaleLinear().range([height, 0]);
@@ -49,34 +26,74 @@ export default function StockChart({ stockCode, apiUrl }) {
                 .append("div")
                 .attr("class", "tooltip");
 
+            const tooltipValues = d3.select("#chart-container")
+                .append("div")
+                .attr("class", "tooltip-values")
+                .style("position", "absolute")
+                .style("top", "65px")
+                .style("left", "38px")
+                .style("color", "#fff");
+
             const tooltipRawDate = d3.select("body")
                 .append("div")
                 .attr("class", "tooltip");
 
-            const gradient = svg.append("defs")
-                .append("linearGradient")
-                .attr("id", "gradient")
-                .attr("x1", "0%")
-                .attr("x2", "0%")
-                .attr("y1", "0%")
-                .attr("y2", "100%")
-                .attr("spreadMethod", "pad");
+            x.domain(d3.extent(chartData, d => d.Date));
+            y.domain([0, d3.max(chartData, d => Math.max(d.High, d.Low, d.Close) + 0.05 * Math.max(d.High, d.Low, d.Close))]);
 
-            gradient.append("stop")
-                .attr("offset", "0%")
-                .attr("stop-color", "#85bb65")
-                .attr("stop-opacity", 1);
+            svg.append("path")
+                .datum(chartData)
+                .attr("class", "line high-line")
+                .attr("fill", "none")
+                .attr("stroke-width", 1)
+                .attr("d", d3.line()
+                    .x(d => x(d.Date))
+                    .y(d => y(d.High))
+                )
+                .attr("stroke", "green");
 
-            gradient.append("stop")
-                .attr("offset", "100%")
-                .attr("stop-color", "#85bb65")
-                .attr("stop-opacity", 0);
+            svg.append("path")
+                .datum(chartData)
+                .attr("class", "line low-line")
+                .attr("fill", "none")
+                .attr("d", d3.line()
+                    .x(d => x(d.Date))
+                    .y(d => y(d.Low))
+                )
+                .attr("stroke", "red");
 
-            const data = await fetchChartData();
-            if (!data) return;
+            svg.append("path")
+                .datum(chartData)
+                .attr("class", "area high-area")
+                .attr("fill", "green")
+                .attr("opacity", 0.2)
+                .attr("d", d3.area()
+                    .x(d => x(d.Date))
+                    .y0(d => y(d.Close))
+                    .y1(d => y(d.High))
+                );
 
-            x.domain(d3.extent(data, d => d.Date));
-            y.domain([0, d3.max(data, d => d.Close + (0.05 * d.Close))]);
+            svg.append("path")
+                .datum(chartData)
+                .attr("class", "area low-area")
+                .attr("fill", "red")
+                .attr("opacity", 0.2)
+                .attr("d", d3.area()
+                    .x(d => x(d.Date))
+                    .y0(d => y(d.Close))
+                    .y1(d => y(d.Low))
+                );
+
+
+            svg.append("path")
+                .datum(chartData)
+                .attr("class", "line close-line")
+                .attr("fill", "none")
+                .attr("d", d3.line()
+                    .x(d => x(d.Date))
+                    .y(d => y(d.Close))
+                )
+                .attr("stroke", "#C0C0C0");
 
             svg.append("g")
                 .attr("class", "grid")
@@ -96,7 +113,8 @@ export default function StockChart({ stockCode, apiUrl }) {
                     .tickValues(x.ticks(d3.timeYear.every(1)))
                     .tickFormat(d3.timeFormat("%Y")))
                 .selectAll(".tick text")
-                .style("stroke-opacity", 1)
+                .style("stroke-opacity", 1);
+
             svg.selectAll(".tick text")
                 .attr("fill", "#777");
 
@@ -113,48 +131,24 @@ export default function StockChart({ stockCode, apiUrl }) {
                 .selectAll(".tick text")
                 .attr("fill", "#777");
 
-            const line = d3.line()
-                .x(d => x(d.Date))
-                .y(d => y(d.Close));
-
-            const area = d3.area()
-                .x(d => x(d.Date))
-                .y0(height)
-                .y1(d => y(d.Close));
-
-            svg.append("path")
-                .datum(data)
-                .attr("class", "area")
-                .attr("d", area)
-                .style("fill", "url(#gradient)")
-                .style("opacity", .5);
-
-            const path = svg.append("path")
-                .datum(data)
-                .attr("class", "line")
-                .attr("fill", "none")
-                .attr("stroke", "#85bb65")
-                .attr("stroke-width", 1)
-                .attr("d", line);
-
             const circle = svg.append("circle")
                 .attr("r", 0)
-                .attr("fill", "red")
+                .attr("fill", "white")
                 .style("stroke", "white")
-                .attr("opacity", 0.7)
+                .attr("opacity", 0.6)
                 .style("pointer-events", "none");
 
             const tooltipLineX = svg.append("line")
                 .attr("class", "tooltip-line")
                 .attr("id", "tooltip-line-x")
-                .attr("stroke", "red")
+                .attr("stroke", "white")
                 .attr("stroke-width", 1)
                 .attr("stroke-dasharray", "2,2");
 
             const tooltipLineY = svg.append("line")
                 .attr("class", "tooltip-line")
                 .attr("id", "tooltip-line-y")
-                .attr("stroke", "red")
+                .attr("stroke", "white")
                 .attr("stroke-width", 1)
                 .attr("stroke-dasharray", "2,2");
 
@@ -163,14 +157,14 @@ export default function StockChart({ stockCode, apiUrl }) {
                 .attr("height", height);
 
             listeningRect.on("mousemove", function (event) {
-                data.sort((a, b) => a.Date - b.Date)
+                chartData.sort((a, b) => a.Date - b.Date)
                 const [xCoord] = d3.pointer(event, this);
                 const bisectDate = d3.bisector(d => d.Date).left;
                 const x0 = x.invert(xCoord);
-                const i = bisectDate(data, x0, 1);
-                if (i >= data.length) return;
-                const d0 = data[i - 1 < 0 ? 0 : i - 1];
-                const d1 = data[i];
+                const i = bisectDate(chartData, x0, 1);
+                if (i >= chartData.length) return;
+                const d0 = chartData[i - 1 < 0 ? 0 : i - 1];
+                const d1 = chartData[i];
                 const d = x0 - d0.Date > d1.Date - x0 ? d1 : d0;
                 const xPos = x(d.Date);
                 const yPos = y(d.Close);
@@ -186,7 +180,7 @@ export default function StockChart({ stockCode, apiUrl }) {
 
                 tooltip
                     .style("display", "block")
-                    .style("left", `${width + 22}px`) // Adjust tooltip position for better alignment
+                    .style("left", `${width + 22}px`)
                     .style("top", `${yPos + 44}px`)
                     .html(`₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}`);
 
@@ -195,6 +189,15 @@ export default function StockChart({ stockCode, apiUrl }) {
                     .style("left", `${xPos - 19}px`)
                     .style("top", `${height + 31}px`)
                     .html(`${d.Date !== undefined ? d.Date.toISOString().slice(0, 10) : 'N/A'}`);
+
+                tooltipValues.html('');
+
+                tooltipValues.html(`
+                    <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Open: ₹${d.Open !== undefined ? d.Open.toFixed(2) : 'N/A'}</p>
+                    <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">High: ₹${d.High !== undefined ? d.High.toFixed(2) : 'N/A'}</p>
+                    <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Low: ₹${d.Low !== undefined ? d.Low.toFixed(2) : 'N/A'}</p>
+                    <p style="display: inline-block; color: ${d.Open > d.Close ? 'red' : 'green'};">Close: ₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}</p>
+                `);
             });
 
             listeningRect.on("mouseleave", function () {
@@ -205,24 +208,70 @@ export default function StockChart({ stockCode, apiUrl }) {
                 tooltipLineY.attr("y1", 0).attr("y2", 0);
                 tooltipLineX.style("display", "none");
                 tooltipLineY.style("display", "none");
+                tooltipValues.html('');
             });
 
             const sliderRange = sliderBottom()
-                .min(d3.min(data, d => d.Date))
-                .max(d3.max(data, d => d.Date))
+                .min(d3.min(chartData, d => d.Date))
+                .max(d3.max(chartData, d => d.Date))
                 .width(300)
                 .tickFormat(d3.timeFormat('%Y-%m-%d'))
                 .ticks(3)
-                .default([d3.min(data, d => d.Date), d3.max(data, d => d.Date)])
+                .default([d3.min(chartData, d => d.Date), d3.max(chartData, d => d.Date)])
                 .fill('#85bb65');
 
             sliderRange.on('onchange', val => {
-                x.domain(val);
-                const filteredData = data.filter(d => d.Date >= val[0] && d.Date <= val[1]);
+                const filteredData = chartData.filter(d => d.Date >= val[0] && d.Date <= val[1]);
 
-                svg.select(".line").attr("d", line(filteredData));
-                svg.select(".area").attr("d", area(filteredData));
-                y.domain([0, d3.max(filteredData, d => d.Close)]);
+                x.domain(d3.extent(filteredData, d => d.Date));
+                y.domain([d3.min(filteredData, d => Math.min(d.High, d.Low, d.Close)), d3.max(filteredData, d => Math.max(d.High, d.Low, d.Close) + 0.05 * Math.max(d.High, d.Low, d.Close))]);
+
+                svg.select(".high-line")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.line()
+                        .x(d => x(d.Date))
+                        .y(d => y(d.High))
+                    );
+
+                svg.select(".high-area")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.area()
+                        .x(d => x(d.Date))
+                        .y0(d => y(d.Close))
+                        .y1(d => y(d.High))
+                    );
+
+                svg.select(".low-line")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.line()
+                        .x(d => x(d.Date))
+                        .y(d => y(d.Low))
+                    );
+
+                svg.select(".low-area")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.area()
+                        .x(d => x(d.Date))
+                        .y0(d => y(d.Close))
+                        .y1(d => y(d.Low))
+                    );
+
+                svg.select(".close-line")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.line()
+                        .x(d => x(d.Date))
+                        .y(d => y(d.Close))
+                    );
 
                 svg.select(".x-axis")
                     .transition()
@@ -230,6 +279,13 @@ export default function StockChart({ stockCode, apiUrl }) {
                     .call(d3.axisBottom(x)
                         .tickValues(x.ticks(d3.timeYear.every(1)))
                         .tickFormat(d3.timeFormat("%Y")));
+
+                const yAxis = d3.axisRight(y)
+                    .ticks(10)
+                    .tickFormat(d => {
+                        if (d <= 0) return "";
+                        return `₹${d.toFixed(2)}`;
+                    });
 
                 svg.select(".y-axis")
                     .transition()
@@ -240,7 +296,6 @@ export default function StockChart({ stockCode, apiUrl }) {
                             if (d <= 0) return "";
                             return `₹${d.toFixed(2)}`;
                         }));
-
             });
 
             const gRange = d3
@@ -267,40 +322,18 @@ export default function StockChart({ stockCode, apiUrl }) {
         renderChart();
 
         return () => {
+            d3.selectAll(".area").remove();
             d3.select("#chart-container").select("svg").remove();
             d3.select("#slider-range").select("svg").remove();
-            d3.select("#slider-range").select("svg").remove();
         };
-    }, [stockCode, apiUrl]);
+    }, [stockCode, chartData]);
 
     return (
         <>
-            {loading && <Loader />}
-            <div className="row" style={{ justifyContent: 'flex-start', padding: '0', maxHeight: '20px' }}>
-                <div className="col chart-col" style={{ flex: '1', maxWidth: 'max-content' }}>
-                    <svg id="chart-title" width="auto" height="40%">
-                        <text x="10" y="40" className="chart-title" fontSize="20px" fill="#fff" fontWeight="bold" fontFamily="sans-serif">
-                            {stockCode} &#8226; 1D &#8226; NSE
-                        </text>
-                    </svg>
-                </div>
-                <div className="col chart-col" style={{ flex: '1', maxWidth: 'max-content', paddingTop: '15px', marginLeft: '-40px' }}>
-                    <MDBDropdown>
-                        <MDBDropdownToggle size='sm'>Pattern</MDBDropdownToggle>
-                        <MDBDropdownMenu dark>
-                            <MDBDropdownItem link aria-current={true} childTag='button'>
-                                <FontAwesomeIcon icon={faArrowTrendUp} style={{ marginRight: '10px' }} />Line
-                            </MDBDropdownItem>
-                            <MDBDropdownItem link childTag='button'>
-                                <FontAwesomeIcon icon={faChartSimple} style={{ marginRight: '7px' }} /> Candles
-                            </MDBDropdownItem>
-                        </MDBDropdownMenu>
-                    </MDBDropdown>
-                </div>
-            </div>
             <div id="chart-container"></div>
             <div id="slider-range"></div>
         </>
     );
-}
+};
 
+export default StockHLCChartContent;

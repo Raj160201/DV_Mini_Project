@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { useNavigate } from 'react-router-dom';
 import companyData from '../Utils/data/company.json';
 import Loader from './Loader';
@@ -68,7 +69,7 @@ export default function Stocks() {
 
                 const updatedStockData = await Promise.all(
                     companyData.map(async (company) => {
-                        const { ISIN_Code, Company_Code } = company;
+                        const { ISIN_Code, Company_Code, Company_Name } = company;
                         let stockInfo, lastDayInfo;
                         const currentTime = today.getTime();
                         const lastTradingDay = await findLastTradingDay(today);
@@ -81,7 +82,7 @@ export default function Stocks() {
                             lastDayInfo = await stockApi('NSE_EQ', ISIN_Code, '30minute', lastSecondTradingDay, lastSecondTradingDay);
                         } else if (currentTime < marketOpeningTime.getTime()) {
                             const lastSecondTradingDay = await findLastTradingDay(new Date(lastTradingDay));
-                            stockInfo = await intradayStockApi('NSE_EQ', ISIN_Code);
+                            stockInfo = await stockApi('NSE_EQ', ISIN_Code, '30minute', lastTradingDay, lastTradingDay)
                             lastDayInfo = await stockApi('NSE_EQ', ISIN_Code, '30minute', lastSecondTradingDay, lastSecondTradingDay);
                         } else if (currentTime >= marketOpeningTime.getTime() && currentTime <= marketClosingTime.getTime()) {
                             stockInfo = await intradayStockApi('NSE_EQ', ISIN_Code);
@@ -96,6 +97,7 @@ export default function Stocks() {
                         const changePercentage = ((change / lastDayLTP) * 100).toFixed(2);
 
                         return {
+                            Company_Name,
                             Company_Code,
                             ISIN_Code,
                             LTP: stockInfo.data.candles[0][4],
@@ -127,51 +129,57 @@ export default function Stocks() {
     );
 
     return (
-        <div style={{ maxHeight: '750px', overflowY: 'auto' }}>
-            <input
-                type="text"
-                placeholder="Search by Company Code"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                    width: '345px',
-                    backgroundColor: '#0f141f',
-                    color: '#fff',
-                    border: '1px solid #555',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    marginBottom: '10px'
-                }}
-            />
+        <>
+            <ReactTooltip id="my-tooltip" />
+            <div style={{ maxHeight: '750px', overflowY: 'auto' }}>
+                <input
+                    type="text"
+                    placeholder="Search by Company Code"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                        width: '100%',
+                        maxWidth: '545px',
+                        backgroundColor: '#0f141f',
+                        color: '#fff',
+                        border: '1px solid #555',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        marginBottom: '10px'
+                    }}
+                />
 
-            {isLoading ? (
-                <Loader />
-            ) : filteredStockData.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#fff' }}>
-                    No results found for "{searchQuery}"
-                </div>
-            ) : (
-                <table className="table table-sm custom-table">
-                    <thead className="thead-custom">
-                        <tr>
-                            <th scope="col">Company</th>
-                            <th scope="col">LTP</th>
-                            <th scope="col">Chg</th>
-                            <th scope="col">Chg%</th>
-                        </tr>
-                    </thead>
-                    <tbody className="table-group-divider table-divider-color">
-                        {filteredStockData.map((stock, index) => (
-                            <tr key={index} onClick={() => handleTableRowClick(stock)}>
-                                <td>{stock.Company_Code}</td>
-                                <td>{stock.LTP}</td>
-                                <td style={{ color: stock.Color }}>{stock.Change}</td>
-                                <td style={{ color: stock.Color }}>{stock.ChangePercentage}%</td>
+
+                {isLoading ? (
+                    <Loader />
+                ) : filteredStockData.length === 0 ? (
+                    <div style={{ textAlign: 'center', color: '#fff' }}>
+                        No results found for "{searchQuery}"
+                    </div>
+                ) : (
+                    <table className="table table-sm custom-table">
+                        <thead className="thead-custom">
+                            <tr>
+                                <th scope="col">Company</th>
+                                <th scope="col">LTP</th>
+                                <th scope="col">Chg</th>
+                                <th scope="col">Chg%</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </div>
+                        </thead>
+                        <tbody className="table-group-divider table-divider-color">
+                            {filteredStockData.map((stock, index) => (
+                                <tr key={index} onClick={() => handleTableRowClick(stock)}>
+                                    <td data-tooltip-id="my-tooltip" data-tooltip-content={`${stock.Company_Name}`}>{stock.Company_Code}</td>
+                                    <td>{stock.LTP}</td>
+                                    <td style={{ color: stock.Color }}>{stock.Change}</td>
+                                    <td style={{ color: stock.Color }}>{stock.ChangePercentage}%</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )
+                }
+            </div >
+        </>
     );
 }
