@@ -93,7 +93,7 @@ const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
                     .x(d => x(d.Date))
                     .y(d => y(d.Close))
                 )
-                .attr("stroke", "white");
+                .attr("stroke", "#C0C0C0");
 
             svg.append("g")
                 .attr("class", "grid")
