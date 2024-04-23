@@ -169,8 +169,8 @@ export default function Stocks() {
                         <tbody className="table-group-divider table-divider-color">
                             {filteredStockData.map((stock, index) => (
                                 <tr key={index} onClick={() => handleTableRowClick(stock)}>
-                                    <td data-tooltip-id="my-tooltip" data-tooltip-content={`${stock.Company_Name}`}>{stock.Company_Code}</td>
-                                    <td>{stock.LTP}</td>
+                                    <td style={{ color: '#fff' }} data-tooltip-id="my-tooltip" data-tooltip-content={`${stock.Company_Name}`}>{stock.Company_Code}</td>
+                                    <td style={{ color: '#fff' }}>{stock.LTP}</td>
                                     <td style={{ color: stock.Color }}>{stock.Change}</td>
                                     <td style={{ color: stock.Color }}>{stock.ChangePercentage}%</td>
                                 </tr>
