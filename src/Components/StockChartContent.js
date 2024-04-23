@@ -14,7 +14,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const [chartData, setChartData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedChart, setSelectedChart] = useState('area');
-    const [selectedTime, setSelectedTime] = useState('day');
+    const [selectedTime, setSelectedTime] = useState('month');
     const [selectedChartIcon, setChartIcon] = useState(faChartArea);
 
     const today = new Date().toISOString().split('T')[0];
