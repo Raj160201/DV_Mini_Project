@@ -64,6 +64,29 @@ const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
 
             svg.append("path")
                 .datum(chartData)
+                .attr("class", "area high-area")
+                .attr("fill", "green")
+                .attr("opacity", 0.2)
+                .attr("d", d3.area()
+                    .x(d => x(d.Date))
+                    .y0(d => y(d.Close))
+                    .y1(d => y(d.High))
+                );
+
+            svg.append("path")
+                .datum(chartData)
+                .attr("class", "area low-area")
+                .attr("fill", "red")
+                .attr("opacity", 0.2)
+                .attr("d", d3.area()
+                    .x(d => x(d.Date))
+                    .y0(d => y(d.Close))
+                    .y1(d => y(d.Low))
+                );
+
+
+            svg.append("path")
+                .datum(chartData)
                 .attr("class", "line close-line")
                 .attr("fill", "none")
                 .attr("d", d3.line()
@@ -212,6 +235,16 @@ const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
                         .y(d => y(d.High))
                     );
 
+                svg.select(".high-area")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.area()
+                        .x(d => x(d.Date))
+                        .y0(d => y(d.Close))
+                        .y1(d => y(d.High))
+                    );
+
                 svg.select(".low-line")
                     .datum(filteredData)
                     .transition()
@@ -219,6 +252,16 @@ const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
                     .attr("d", d3.line()
                         .x(d => x(d.Date))
                         .y(d => y(d.Low))
+                    );
+
+                svg.select(".low-area")
+                    .datum(filteredData)
+                    .transition()
+                    .duration(300)
+                    .attr("d", d3.area()
+                        .x(d => x(d.Date))
+                        .y0(d => y(d.Close))
+                        .y1(d => y(d.Low))
                     );
 
                 svg.select(".close-line")
@@ -279,7 +322,7 @@ const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
         renderChart();
 
         return () => {
-            // Cleanup SVG content
+            d3.selectAll(".area").remove();
             d3.select("#chart-container").select("svg").remove();
             d3.select("#slider-range").select("svg").remove();
         };
