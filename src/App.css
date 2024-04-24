@@ -1,3 +1,34 @@
+:root {
+    --chart-price: 1034px;
+    --chart-date: 1022px;
+    --chart-ohlc: 1052px;
+}
+
+@media screen and (max-width: 1600px) {
+    :root {
+        --chart-price: 976px;
+        --chart-date: 956px;
+        --chart-ohlc: 986px;
+    }
+}
+
+@media screen and (max-width: 1536px) {
+    :root {
+        --chart-price: 902px;
+        --chart-date: 892px;
+        --chart-ohlc: 920px;
+    }
+}
+
+@media screen and (max-width: 1440px) {
+    :root {
+        --chart-price: 970px;
+        --chart-date: 960px;
+        --chart-ohlc: 988px;
+    }
+}
+
+
 .btn-scroll {
     transition: 0.9s;
     color: rgb(0, 255, 98);

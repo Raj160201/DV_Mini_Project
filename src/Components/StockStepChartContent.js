@@ -24,7 +24,7 @@ const StockStepChartContent = ({ stockCode, chartData, loading }) => {
                 .append("div")
                 .attr("class", "tooltip-values")
                 .style("position", "absolute")
-                .style("top", "65px")
+                .style("top", `${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chart-ohlc'), 10)}px`)
                 .style("left", "38px");
 
             const additionalDataContainer = d3.select("#chart-container")
@@ -178,14 +178,14 @@ const StockStepChartContent = ({ stockCode, chartData, loading }) => {
 
                 tooltip
                     .style("display", "block")
-                    .style("left", `${width + 22}px`) // Adjust tooltip position for better alignment
-                    .style("top", `${yPos + 44}px`)
+                    .style("left", `${width + 22}px`)
+                    .style("top", `${yPos + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chart-price'), 10)}px`)
                     .html(`₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}`);
 
                 tooltipRawDate
                     .style("display", "block")
                     .style("left", `${xPos - 19}px`)
-                    .style("top", `${height + 31}px`)
+                    .style("top", `${height + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chart-date'), 10)}px`)
                     .html(`${d.Date !== undefined ? d.Date.toISOString().slice(0, 10) : 'N/A'}`);
 
                 tooltipValues.html('');
