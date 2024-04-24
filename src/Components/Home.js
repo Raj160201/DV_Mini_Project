@@ -5,7 +5,6 @@ import StockIndex from './Stock_index';
 import IPONews from './IPO_News';
 import Loader from './Loader';
 import StockChartContent from './StockChartContent';
-import tokenApi from '../Utils/apis/token_api';
 import background from '../Assets/background.jpg'
 import Typed from 'typed.js';
 import ScrollToSomeSection from './ScrollToSomeSection';
@@ -21,17 +20,6 @@ export default function Home() {
     }
 
     useEffect(() => {
-        async function fetchTokenData() {
-            try {
-                const data = await tokenApi();
-                setTokenData(data);
-            } catch (error) {
-                console.error("Error fetching token data:", error);
-            }
-        }
-
-        fetchTokenData();
-
         const typed = new Typed('.typed', {
             strings: ['Discover', 'Analyze', 'Decide', 'Execute'],
             loop: true,
