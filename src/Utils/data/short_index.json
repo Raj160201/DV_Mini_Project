@@ -1,0 +1,12 @@
+[
+    {
+        "Index_Name": "BANKNIFTY",
+        "Index_Code": "NIFTY BANK",
+        "Index_Logo": "https://s3-symbol-logo.tradingview.com/sector/financial.svg"
+    },
+    {
+        "Index_Name": "NIFTY 50",
+        "Index_Code": "NIFTY 50",
+        "Index_Logo": "https://s3-symbol-logo.tradingview.com/indices/nifty-50.svg"
+    }
+]

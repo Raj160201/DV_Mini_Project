@@ -19,7 +19,7 @@ export default function Stocks() {
             state: {
                 stockName: stock.Company_Code,
                 companyIsin: stock.ISIN_Code,
-                startDate: '2024-03-27',
+                startDate: '2024-05-27',
                 endDate: '2000-01-01',
             },
         });

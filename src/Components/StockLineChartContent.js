@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import * as d3 from 'd3';
 import { sliderBottom } from 'd3-simple-slider';
 
-const StockLineChartContent = ({ stockCode, chartData, loading }) => {
+const StockLineChartContent = ({ stockCode, chartData, colorData, loading }) => {
     useEffect(() => {
 
         const renderChart = async () => {
@@ -92,13 +92,13 @@ const StockLineChartContent = ({ stockCode, chartData, loading }) => {
                 .datum(chartData)
                 .attr("class", "line")
                 .attr("fill", "none")
-                .attr("stroke", "#85bb65")
+                .attr("stroke", colorData)
                 .attr("stroke-width", 1)
                 .attr("d", line);
 
             const circle = svg.append("circle")
                 .attr("r", 0)
-                .attr("fill", "red")
+                .attr("fill", "white")
                 .style("stroke", "white")
                 .attr("opacity", 0.7)
                 .style("pointer-events", "none");
@@ -106,14 +106,14 @@ const StockLineChartContent = ({ stockCode, chartData, loading }) => {
             const tooltipLineX = svg.append("line")
                 .attr("class", "tooltip-line")
                 .attr("id", "tooltip-line-x")
-                .attr("stroke", "red")
+                .attr("stroke", "white")
                 .attr("stroke-width", 1)
                 .attr("stroke-dasharray", "2,2");
 
             const tooltipLineY = svg.append("line")
                 .attr("class", "tooltip-line")
                 .attr("id", "tooltip-line-y")
-                .attr("stroke", "red")
+                .attr("stroke", "white")
                 .attr("stroke-width", 1)
                 .attr("stroke-dasharray", "2,2");
 

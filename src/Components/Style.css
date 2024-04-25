@@ -401,3 +401,54 @@ rect {
     text-align: left;
 }
 
+/*------/ Button /------*/
+.button {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    font-size: 1rem;
+    border-radius: 0.3rem;
+    border: 1px solid transparent;
+    transition: all 500ms ease;
+    width: 100%;
+    margin: 0;
+}
+
+.button:focus {
+    outline: 0;
+}
+
+.button-rouded {
+    border-radius: 5rem;
+}
+
+.row .button[type=submit] {
+    background: rgba(28, 28, 28, 0.6);
+    border: 0;
+    padding: 5px 20px;
+    color: #fff;
+    transition: 0.4s;
+    font-size: 1.2rem;
+}
+
+.card-nifty .index-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-right: 10px;
+}
+
+.card-nifty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    margin-left: 70px;
+}

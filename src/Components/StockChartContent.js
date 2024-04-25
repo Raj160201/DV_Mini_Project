@@ -12,6 +12,7 @@ import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
 
 const StockChartContent = ({ companyIsin, stockCode }) => {
     const [chartData, setChartData] = useState(null);
+    const [colorData, setColorData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedChart, setSelectedChart] = useState('area');
     const [selectedTime, setSelectedTime] = useState('month');
@@ -34,8 +35,19 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                     Open: candle[1],
                     High: candle[2],
                     Low: candle[3],
-                    Close: candle[4]
+                    Close: candle[4],
+                    Volume: candle[5]
                 }));
+
+                const latestCandle = data[0];
+                const secondLatestCandle = data[1];
+
+                let color;
+                if (latestCandle.Close > secondLatestCandle.Close) {
+                    setColorData('#85bb65');
+                } else {
+                    setColorData('red');
+                }
 
                 setLoading(false);
                 setChartData(data);
@@ -131,10 +143,10 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                 </div>
             </div>
 
-            {selectedChart === 'area' && <StockAreaChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
-            {selectedChart === 'line' && <StockLineChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
+            {selectedChart === 'area' && <StockAreaChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
+            {selectedChart === 'line' && <StockLineChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
             {selectedChart === 'candles' && <StockCandleChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
-            {selectedChart === 'step area' && <StockStepChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
+            {selectedChart === 'step area' && <StockStepChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
             {selectedChart === 'hlc area' && <StockHLCChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
         </>
     );
