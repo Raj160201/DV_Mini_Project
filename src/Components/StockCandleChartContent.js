@@ -46,15 +46,15 @@ const StockCandleChartContent = ({ stockCode, chartData, loading }) => {
             const lowValue = additionalDataContainer.append("div").attr("class", "data-item");
             const highValue = additionalDataContainer.append("div").attr("class", "data-item");
 
-            svg.append("g")
-                .attr("class", "grid")
-                .call(d3.axisLeft(y)
-                    .tickSize(-width)
-                    .tickFormat("")
-                )
-                .selectAll("line")
-                .style("stroke", "#ddd")
-                .style("stroke-opacity", 0.07);
+            // svg.append("g")
+            //     .attr("class", "grid")
+            //     .call(d3.axisLeft(y)
+            //         .tickSize(-width)
+            //         .tickFormat("")
+            //     )
+            //     .selectAll("line")
+            //     .style("stroke", "#ddd")
+            //     .style("stroke-opacity", 0.07);
 
             const candleWidth = 1;
 

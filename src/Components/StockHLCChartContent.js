@@ -95,15 +95,15 @@ const StockHLCChartContent = ({ stockCode, chartData, loading }) => {
                 )
                 .attr("stroke", "#C0C0C0");
 
-            svg.append("g")
-                .attr("class", "grid")
-                .call(d3.axisLeft(y)
-                    .tickSize(-width)
-                    .tickFormat("")
-                )
-                .selectAll("line")
-                .style("stroke", "#ddd")
-                .style("stroke-opacity", 0.07);
+            // svg.append("g")
+            //     .attr("class", "grid")
+            //     .call(d3.axisLeft(y)
+            //         .tickSize(-width)
+            //         .tickFormat("")
+            //     )
+            //     .selectAll("line")
+            //     .style("stroke", "#ddd")
+            //     .style("stroke-opacity", 0.07);
 
             svg.append("g")
                 .attr("class", "x-axis")
