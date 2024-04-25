@@ -70,15 +70,15 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
             x.domain(d3.extent(chartData, d => d.Date));
             y.domain([0, d3.max(chartData, d => d.Close + (0.05 * d.Close))]);
 
-            svg.append("g")
-                .attr("class", "grid")
-                .call(d3.axisLeft(y)
-                    .tickSize(-width)
-                    .tickFormat("")
-                )
-                .selectAll("line")
-                .style("stroke", "#ddd")
-                .style("stroke-opacity", 0.07);
+            // svg.append("g")
+            //     .attr("class", "grid")
+            //     .call(d3.axisLeft(y)
+            //         .tickSize(-width)
+            //         .tickFormat("")
+            //     )
+            //     .selectAll("line")
+            //     .style("stroke", "#ddd")
+            //     .style("stroke-opacity", 0.07);
 
             svg.append("g")
                 .attr("class", "x-axis")
@@ -126,7 +126,7 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 .attr("class", "line")
                 .attr("fill", "none")
                 .attr("stroke", colorData)
-                .attr("stroke-width", 1)
+                .attr("stroke-width", 2)
                 .attr("d", line);
 
             const circle = svg.append("circle")

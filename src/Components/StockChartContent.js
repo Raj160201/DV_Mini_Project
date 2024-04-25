@@ -46,7 +46,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                 if (latestCandle.Close > secondLatestCandle.Close) {
                     setColorData('#85bb65');
                 } else {
-                    setColorData('red');
+                    setColorData('#C41E3A');
                 }
 
                 setLoading(false);

@@ -93,7 +93,7 @@ const StockLineChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 .attr("class", "line")
                 .attr("fill", "none")
                 .attr("stroke", colorData)
-                .attr("stroke-width", 1)
+                .attr("stroke-width", 2)
                 .attr("d", line);
 
             const circle = svg.append("circle")
