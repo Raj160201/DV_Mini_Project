@@ -22,7 +22,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [variablePeriod, setVariablePeriod] = useState('');
     const [selectedIndicatorWithPeriod, setSelectedIndicatorWithPeriod] = useState([]);
-
+    const [selectedColor, setSelectedColor] = useState('Red');
     const [selectedChartIcon, setChartIcon] = useState(faChartArea);
 
     const today = new Date().toISOString().split('T')[0];
@@ -97,16 +97,18 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const handleModalClose = () => {
         setModalIsOpen(false);
         setVariablePeriod('');
+        setSelectedColor('Red');
     };
     const handleModalSubmit = () => {
         if (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0) {
             alert('Please enter a valid positive number for the period.');
             return;
         }
-        const updatedIndicator = [...selectedIndicator, { ...selectedIndicatorWithPeriod, period: parseInt(variablePeriod) }];
+        const updatedIndicator = [...selectedIndicator, { ...selectedIndicatorWithPeriod, period: parseInt(variablePeriod), color: selectedColor }];
         setSelectedIndicator(updatedIndicator);
         setModalIsOpen(false);
         setVariablePeriod('');
+        setSelectedColor('Red');
     };
     
     return (
@@ -240,7 +242,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                 },
                 content: {
                     width: '350px',
-                    height: '240px',
+                    height: '300px',
                     margin: 'auto',
                     backgroundColor: 'black',
                     borderRadius: '8px',
@@ -265,6 +267,19 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                         borderRadius: '4px',
                     }}
                 />
+                <input 
+                    type="color"
+                    value={selectedColor}
+                    onChange={(e) => setSelectedColor(e.target.value)}
+                    style={{
+                        marginBottom: '20px',
+                        width: '100%',
+                        padding: '8px',
+                        boxSizing: 'border-box',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                    }}
+                />  
                 <div style={{ textAlign: 'center' }}>
                     <button
                         onClick={handleModalSubmit}
