@@ -76,23 +76,22 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
                 .range([height, 0]);
 
             const movingAverage = (data, numberOfPricePoints) => {
-                return data.map((row, index, total) => {
-                    const start = Math.max(0, index - numberOfPricePoints);
-                    const end = index;
-                    const subset = total.slice(start, end + 1);
-                    const sum = subset.reduce((a, b) => {
-                        return a + b['Close'];
-                    }, 0);
+                return data.map((d, i) => {
+                    if (i < numberOfPricePoints - 1) return null;
+                    const subset = data.slice(i - numberOfPricePoints + 1, i + 1);
+                    const sum = subset.reduce((acc, cur) => acc + cur.Close, 0);
                     return {
-                        Date: row['Date'],
-                        average: sum / subset.length
+                        Date: data[i]['Date'],
+                        average: sum / numberOfPricePoints
                     };
                 });
             };
 
+
             const movingAverageLine = d3.line()
                 .x(d => x(d.Date))
                 .y(d => y(d.average))
+                .defined(d => d !== null)
                 .curve(d3.curveBasis);
 
             const expoMovingAverage = (data, numberOfPricePoints) => {
