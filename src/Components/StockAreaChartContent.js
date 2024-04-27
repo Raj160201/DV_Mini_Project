@@ -3,8 +3,10 @@ import * as d3 from 'd3';
 import { sliderBottom } from 'd3-simple-slider';
 import '../App.css';
 
-const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => {
+const StockAreaChartContent = ({ stockCode, chartData, selectedIndicator, colorData, loading }) => {
     useEffect(() => {
+        let movingAverageData, expoMovingAverageData, volWeightedAvgData;
+        let movingAverageValue, expoMovingAverageValue, volWeightedAvgValue;
 
         const renderChart = async () => {
             const margin = { top: 40, right: 68, bottom: 40, left: 10 };
@@ -111,6 +113,11 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 });
             };
 
+            const movingAverageLine = d3.line()
+                .x(d => x(d.Date))
+                .y(d => y(d.average))
+                .curve(d3.curveBasis);
+
             const expoMovingAverage = (data, numberOfPricePoints) => {
                 const alpha = 2 / (numberOfPricePoints + 1);
                 const ema = [];
@@ -129,6 +136,11 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 }
                 return ema;
             };
+
+            const expoMovingAverageLine = d3.line()
+                .x(d => x(d.Date))
+                .y(d => y(d.expoAverage))
+                .curve(d3.curveBasis);
 
             const volWeightedAvg = (data) => {
                 let cumulativeTypicalPriceVolume = 0;
@@ -152,45 +164,52 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 });
             };
 
+            const volWeightedAvgLine = d3.line()
+                .x(d => x(d.Date))
+                .y(d => y(d.VWAP))
+                .curve(d3.curveBasis);
 
-            // SIMPLE MOVING AVERAGE
 
-            const movingAverageData = movingAverage(chartData, 15);
-            const movingAverageLine = d3.line().x(d => x(d['Date'])).y(d => y(d['average'])).curve(d3.curveBasis);
+            // Simple Moving Average
+            if (selectedIndicator.some(indicator => indicator.indicator === 'SMA')) {
+                const movingAveragePeriod = Number(selectedIndicator.find(indicator => indicator.indicator === 'SMA').period);
+                const colorpath = selectedIndicator.find(indicator => indicator.indicator === 'SMA').color;
+                movingAverageData = movingAverage(chartData, movingAveragePeriod);
 
-            const movingAveragePath = svg
-                .append('path')
-                .data([movingAverageData])
-                .style('fill', 'none')
-                .attr('id', 'movingAverageLine')
-                .attr('stroke', '#FF8900')
-                .attr('d', movingAverageLine);
+                svg.append('path')
+                    .data([movingAverageData])
+                    .style('fill', 'none')
+                    .attr('id', 'movingAverageLine')
+                    .attr('stroke', colorpath)
+                    .attr('d', movingAverageLine);
+            }
 
-            // EXPONENTIAL MOVING AVERAGE
+            // Exponential Moving Average
+            if (selectedIndicator.some(indicator => indicator.indicator === 'EMA')) {
+                const expoMovingAveragePeriod = Number(selectedIndicator.find(indicator => indicator.indicator === 'EMA').period);
+                const colorpath = selectedIndicator.find(indicator => indicator.indicator === 'EMA').color;
+                expoMovingAverageData = expoMovingAverage(chartData, expoMovingAveragePeriod);
 
-            const expoMovingAverageData = expoMovingAverage(chartData, 15);
-            const expoMovingAverageLine = d3.line().x(d => x(d['Date'])).y(d => y(d['expoAverage'])).curve(d3.curveBasis);
-
-            const expoMovingAveragePath = svg
-                .append('path')
-                .data([expoMovingAverageData])
-                .style('fill', 'none')
-                .attr('id', 'expoMovingAverageLine')
-                .attr('stroke', '#fff')
-                .attr('d', expoMovingAverageLine);
+                svg.append('path')
+                    .data([expoMovingAverageData])
+                    .style('fill', 'none')
+                    .attr('id', 'expoMovingAverageLine')
+                    .attr('stroke', colorpath)
+                    .attr('d', expoMovingAverageLine);
+            }
 
             // Volume-Weighted Average Price
+            if (selectedIndicator.some(indicator => indicator.indicator === 'VWAP')) {
+                const colorpath = selectedIndicator.find(indicator => indicator.indicator === 'VWAP').color;
+                volWeightedAvgData = volWeightedAvg(chartData);
 
-            const volWeightedAvgData = volWeightedAvg(chartData);
-            const volWeightedAvgLine = d3.line().x(d => x(d['Date'])).y(d => y(d['VWAP'])).curve(d3.curveBasis);
-
-            const volWeightedAvgPath = svg
-                .append('path')
-                .data([volWeightedAvgData])
-                .style('fill', 'none')
-                .attr('id', 'volWeightedAvgLine')
-                .attr('stroke', '#5b34eb')
-                .attr('d', volWeightedAvgLine);
+                svg.append('path')
+                    .data([volWeightedAvgData])
+                    .style('fill', 'none')
+                    .attr('id', 'volWeightedAvgLine')
+                    .attr('stroke', colorpath)
+                    .attr('d', volWeightedAvgLine);
+            }
 
             // VOLUME BAR CHART
 
@@ -199,13 +218,10 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
             const yMinVolume = d3.min(volData, d => {
                 return Math.min(d['Volume']);
             });
-            console.log(yMinVolume);
 
             const yMaxVolume = d3.max(volData, d => {
                 return Math.max(d['Volume']);
             });
-
-            console.log(yMaxVolume);
 
             const yVolumeScale = d3
                 .scaleLinear()
@@ -333,9 +349,17 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                     .style("top", `${yPos + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chart-price'), 10)}px`)
                     .html(`₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}`);
 
-                const movingAverageValue = movingAverageData.find(entry => entry.Date.getTime() === d.Date.getTime());
-                const expoMovingAverageValue = expoMovingAverageData.find(entry => entry.Date.getTime() === d.Date.getTime());
-                const volWeightedAvgValue = volWeightedAvgData.find(entry => entry.Date.getTime() === d.Date.getTime());
+                let movingAverageValue, expoMovingAverageValue, volWeightedAvgValue;
+
+                if (selectedIndicator.some(indicator => indicator.indicator === 'SMA')) {
+                    movingAverageValue = movingAverageData.find(entry => entry.Date.getTime() === d.Date.getTime());
+                }
+                if (selectedIndicator.some(indicator => indicator.indicator === 'EMA')) {
+                    expoMovingAverageValue = expoMovingAverageData.find(entry => entry.Date.getTime() === d.Date.getTime());
+                }
+                if (selectedIndicator.some(indicator => indicator.indicator === 'VWAP')) {
+                    volWeightedAvgValue = volWeightedAvgData.find(entry => entry.Date.getTime() === d.Date.getTime());
+                }
 
                 tooltipRawDate
                     .style("display", "block")
@@ -346,16 +370,24 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 tooltipValues.html('');
 
                 tooltipValues.html(`
-                        <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Open: ₹${d.Open !== undefined ? d.Open.toFixed(2) : 'N/A'}</p>
-                        <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">High: ₹${d.High !== undefined ? d.High.toFixed(2) : 'N/A'}</p>
-                        <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Low: ₹${d.Low !== undefined ? d.Low.toFixed(2) : 'N/A'}</p>
-                        <p style="display: inline-block; color: ${d.Open > d.Close ? 'red' : 'green'};">Close: ₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}</p>
-                        <p style="text-align: left; margin-top: -15px; color: #FF8900;">SMA: ₹${movingAverageValue !== undefined ? movingAverageValue.average.toFixed(2) : 'N/A'}</p>
-                        <p style="text-align: left; margin-top: -15px; color: #FFF;">EMA: ₹${expoMovingAverageValue !== undefined ? expoMovingAverageValue.expoAverage.toFixed(2) : 'N/A'}</p>
-                        <p style="text-align: left; margin-top: -15px; color: #5b34eb;">VWAP: ₹${volWeightedAvgValue !== undefined ? volWeightedAvgValue.VWAP.toFixed(2) : 'N/A'}</p>
-                    `);
+                    <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Open: ₹${d.Open !== undefined ? d.Open.toFixed(2) : 'N/A'}</p>
+                    <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">High: ₹${d.High !== undefined ? d.High.toFixed(2) : 'N/A'}</p>
+                    <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Low: ₹${d.Low !== undefined ? d.Low.toFixed(2) : 'N/A'}</p>
+                    <p style="display: inline-block; color: ${d.Open > d.Close ? 'red' : 'green'};">Close: ₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}</p>
+                    <p style="text-align: left; margin-top: -15px; color: ${selectedIndicator.find(indicator => indicator.indicator === 'SMA')?.color || '#FFFFFF'};">
+                        ${selectedIndicator.some(indicator => indicator.indicator === 'SMA') ?
+                        `SMA: ₹${movingAverageValue !== undefined ? movingAverageValue.average.toFixed(2) : 'N/A'}` : ''}
+                    </p>
+                    <p style="text-align: left; margin-top: -15px; color: ${selectedIndicator.find(indicator => indicator.indicator === 'EMA')?.color || '#FFFFFF'};">
+                        ${selectedIndicator.some(indicator => indicator.indicator === 'EMA') ?
+                        `EMA: ₹${expoMovingAverageValue !== undefined ? expoMovingAverageValue.expoAverage.toFixed(2) : 'N/A'}` : ''}
+                    </p>
+                    <p style="text-align: left; margin-top: -15px; color: ${selectedIndicator.find(indicator => indicator.indicator === 'VWAP')?.color || '#FFFFFF'};">
+                        ${selectedIndicator.some(indicator => indicator.indicator === 'VWAP') ?
+                        `VWAP: ₹${volWeightedAvgValue !== undefined ? volWeightedAvgValue.VWAP.toFixed(2) : 'N/A'}` : ''}
+                    </p>
+                `);
             });
-            // volWeightedAvg
 
             listeningRect.on("mouseleave", function () {
                 circle.transition().duration(50).attr("r", 0);
@@ -378,6 +410,9 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 .fill('#85bb65');
 
             sliderRange.on('onchange', val => {
+                svg.select('#movingAverageLine').remove();
+                svg.select('#expoMovingAverageLine').remove();
+                svg.select('#volWeightedAvgLine').remove();
                 const filteredData = chartData.filter(d => d.Date >= val[0] && d.Date <= val[1]);
                 x.domain(d3.extent(filteredData, d => d.Date));
                 y.domain([d3.min(filteredData, d => d.Low - (0.05 * d.Low)), d3.max(filteredData, d => d.High + (0.05 * d.High))]);
@@ -393,9 +428,9 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 xScale.domain([xMin, xMax]);
                 yScale.domain([yMin - 5, yMax]);
 
-                const updatedMovingAverageData = movingAverage(filteredData, 15);
-                const updatedExpoMovingAverageData = expoMovingAverage(filteredData, 15);
-                const updatedVolWeightedAvgData = volWeightedAvg(filteredData);
+                const updatedMovingAverageData = selectedIndicator.some(indicator => indicator.indicator === 'SMA') ? movingAverage(filteredData, Number(selectedIndicator.find(indicator => indicator.indicator === 'SMA').period)) : [];
+                const updatedExpoMovingAverageData = selectedIndicator.some(indicator => indicator.indicator === 'EMA') ? expoMovingAverage(filteredData, Number(selectedIndicator.find(indicator => indicator.indicator === 'EMA').period)) : [];
+                const updatedVolWeightedAvgData = selectedIndicator.some(indicator => indicator.indicator === 'VWAP') ? volWeightedAvg(filteredData) : [];
 
                 svg.select(".x-axis")
                     .transition()
@@ -414,14 +449,12 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                             return `₹${d.toFixed(2)}`;
                         }));
 
-                movingAveragePath.data([updatedMovingAverageData])
-                    .attr('d', movingAverageLine);
+                const movingAveragePath = selectedIndicator.some(indicator => indicator.indicator === 'SMA') ? svg.append('path').data([updatedMovingAverageData]).style('fill', 'none').attr('id', 'movingAverageLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'SMA').color).attr('d', movingAverageLine) : null;
 
-                expoMovingAveragePath.data([updatedExpoMovingAverageData])
-                    .attr('d', expoMovingAverageLine);
+                const expoMovingAveragePath = selectedIndicator.some(indicator => indicator.indicator === 'EMA') ? svg.append('path').data([updatedExpoMovingAverageData]).style('fill', 'none').attr('id', 'expoMovingAverageLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'EMA').color).attr('d', expoMovingAverageLine) : null;
 
-                volWeightedAvgPath.data([updatedVolWeightedAvgData])
-                    .attr('d', volWeightedAvgLine);
+                const volWeightedAvgPath = selectedIndicator.some(indicator => indicator.indicator === 'VWAP') ? svg.append('path').data([updatedVolWeightedAvgData]).style('fill', 'none').attr('id', 'volWeightedAvgLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'VWAP').color).attr('d', volWeightedAvgLine) : null;
+
             });
 
             const gRange = d3

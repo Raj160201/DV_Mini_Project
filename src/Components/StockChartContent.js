@@ -8,7 +8,7 @@ import StockHLCChartContent from './StockHLCChartContent';
 import Loader from './Loader';
 import { MDBDropdown, MDBDropdownMenu, MDBDropdownToggle, MDBDropdownItem } from 'mdb-react-ui-kit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp, faChartArea, faStairs,faCheckSquare  } from '@fortawesome/free-solid-svg-icons';
+import { faArrowTrendUp, faChartArea, faStairs, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
 Modal.setAppElement('#root');
 
@@ -30,45 +30,43 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const apiFooter = `/${selectedTime}/${today}/2000-01-01`;
     const apiUrl = apiHeader + companyIsin + apiFooter;
 
-    useEffect(() => {
-        const fetchChartData = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(apiUrl);
-                const jsonData = await response.json();
+    const fetchChartData = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(apiUrl);
+            const jsonData = await response.json();
 
-                const data = jsonData.data.candles.map(candle => ({
-                    Date: new Date(candle[0]),
-                    Open: candle[1],
-                    High: candle[2],
-                    Low: candle[3],
-                    Close: candle[4],
-                    Volume: candle[5]
-                }));
+            const data = jsonData.data.candles.map(candle => ({
+                Date: new Date(candle[0]),
+                Open: candle[1],
+                High: candle[2],
+                Low: candle[3],
+                Close: candle[4],
+                Volume: candle[5]
+            }));
 
-                const latestCandle = data[0];
-                const secondLatestCandle = data[1];
+            const latestCandle = data[0];
+            const secondLatestCandle = data[1];
 
-                let color;
-                if (latestCandle.Close > secondLatestCandle.Close) {
-                    setColorData('#85bb65');
-                } else {
-                    setColorData('#C41E3A');
-                }
-
-                setLoading(false);
-                setChartData(data);
-            } catch (error) {
-                console.error('Error fetching chart data:', error);
-                setLoading(false);
+            let color;
+            if (latestCandle.Close > secondLatestCandle.Close) {
+                setColorData('#85bb65');
+            } else {
+                setColorData('#C41E3A');
             }
-        };
 
+            setLoading(false);
+            setChartData(data);
+        } catch (error) {
+            console.error('Error fetching chart data:', error);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchChartData();
 
-        return () => {
-            // Cleanup code if necessary
-        };
+        return () => { };
     }, [apiUrl]);
 
     const handleChartChange = (chartType, chartIcon) => {
@@ -80,7 +78,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
         setSelectedTime(timePeriod);
     };
     useEffect(() => {
-        console.log('Indicator:', selectedIndicator);
+        fetchChartData();
     }, [selectedIndicator]);
 
     const handleIndicator = (indicator) => {
@@ -110,7 +108,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
         setVariablePeriod('');
         setSelectedColor('Red');
     };
-    
+
     return (
         <>
             {loading && <Loader />}
@@ -180,92 +178,92 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                     </MDBDropdown>
                 </div>
                 <div className="col chart-col" style={{ flex: '1', maxWidth: 'max-content', paddingTop: '15px', marginLeft: '10px' }}>
-                <MDBDropdown>
-                    <MDBDropdownToggle size='sm'>
-                        {'Select Indicator'}
-                    </MDBDropdownToggle>
-                    <MDBDropdownMenu dark>
-                    <MDBDropdownItem
-        link
-        aria-current={selectedIndicator.some(item => item.indicator === 'SMA')}
-        childTag='button'
-        onClick={() => handleIndicator('SMA')}
-    >
-        <FontAwesomeIcon
-            icon={faCheckSquare}
-            style={{
-                marginRight: '7px',
-                color: selectedIndicator.some(item => item.indicator === 'SMA') ? '#0d6efd' : 'inherit'
-            }}
-        />
-        SMA
-    </MDBDropdownItem>
-    <MDBDropdownItem
-        link
-        aria-current={selectedIndicator.some(item => item.indicator === 'EMA')}
-        childTag='button'
-        onClick={() => handleIndicator('EMA')}
-    >
-        <FontAwesomeIcon
-            icon={faCheckSquare}
-            style={{
-                marginRight: '7px',
-                color: selectedIndicator.some(item => item.indicator === 'EMA') ? '#0d6efd' : 'inherit'
-            }}
-        />
-        EMA
-    </MDBDropdownItem>
-    <MDBDropdownItem
-        link
-        aria-current={selectedIndicator.some(item => item.indicator === 'VO')}
-        childTag='button'
-        onClick={() => handleIndicator('VO')}
-    >
-        <FontAwesomeIcon
-            icon={faCheckSquare}
-            style={{
-                marginRight: '7px',
-                color: selectedIndicator.some(item => item.indicator === 'VO') ? '#0d6efd' : 'inherit'
-            }}
-        />
-        VO
-    </MDBDropdownItem>
-                    </MDBDropdownMenu>
-                </MDBDropdown>
-            </div>
-            <Modal
-            isOpen={modalIsOpen}
-            onRequestClose={handleModalClose}
-            style={{
-                overlay: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                },
-                content: {
-                    width: '350px',
-                    height: '300px',
-                    margin: 'auto',
-                    backgroundColor: 'black',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                },
-            }}
-        >
-            <div style={{ padding: '20px' }}>
-                <h2 style={{ marginBottom: '15px', color: '#fff' }}>Enter Period</h2>
-
-                <input
-                    type="number"
-                    placeholder="Period"
-                    value={variablePeriod}
-                    onChange={(e) => setVariablePeriod(e.target.value)}
+                    <MDBDropdown>
+                        <MDBDropdownToggle size='sm'>
+                            {'Select Indicator'}
+                        </MDBDropdownToggle>
+                        <MDBDropdownMenu dark>
+                            <MDBDropdownItem
+                                link
+                                aria-current={selectedIndicator.some(item => item.indicator === 'SMA')}
+                                childTag='button'
+                                onClick={() => handleIndicator('SMA')}
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCheckSquare}
+                                    style={{
+                                        marginRight: '7px',
+                                        color: selectedIndicator.some(item => item.indicator === 'SMA') ? '#0d6efd' : 'inherit'
+                                    }}
+                                />
+                                SMA
+                            </MDBDropdownItem>
+                            <MDBDropdownItem
+                                link
+                                aria-current={selectedIndicator.some(item => item.indicator === 'EMA')}
+                                childTag='button'
+                                onClick={() => handleIndicator('EMA')}
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCheckSquare}
+                                    style={{
+                                        marginRight: '7px',
+                                        color: selectedIndicator.some(item => item.indicator === 'EMA') ? '#0d6efd' : 'inherit'
+                                    }}
+                                />
+                                EMA
+                            </MDBDropdownItem>
+                            <MDBDropdownItem
+                                link
+                                aria-current={selectedIndicator.some(item => item.indicator === 'VWAP')}
+                                childTag='button'
+                                onClick={() => handleIndicator('VWAP')}
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCheckSquare}
+                                    style={{
+                                        marginRight: '7px',
+                                        color: selectedIndicator.some(item => item.indicator === 'VWAP') ? '#0d6efd' : 'inherit'
+                                    }}
+                                />
+                                VWAP
+                            </MDBDropdownItem>
+                        </MDBDropdownMenu>
+                    </MDBDropdown>
+                </div>
+                <Modal
+                    isOpen={modalIsOpen}
+                    onRequestClose={handleModalClose}
                     style={{
-                        marginBottom: '20px',
-                        width: '100%',
-                        padding: '8px',
-                        boxSizing: 'border-box',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
+                        overlay: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        },
+                        content: {
+                            width: '350px',
+                            height: '300px',
+                            margin: 'auto',
+                            backgroundColor: 'black',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                        },
                     }}
+                >
+                    <div style={{ padding: '20px' }}>
+                        <h2 style={{ marginBottom: '15px', color: '#fff' }}>Enter Period</h2>
+
+                        <input
+                            type="number"
+                            placeholder="Period"
+                            value={variablePeriod}
+                            onChange={(e) => setVariablePeriod(e.target.value)}
+                            style={{
+                                marginBottom: '20px',
+                                width: '100%',
+                                padding: '8px',
+                                boxSizing: 'border-box',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                            }}
                 />
                 <input 
                     type="color"
@@ -279,46 +277,46 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                         border: '1px solid #ccc',
                         borderRadius: '4px',
                     }}
-                />  
-                <div style={{ textAlign: 'center' }}>
-                    <button
-                        onClick={handleModalSubmit}
-                        style={{
-                            marginRight: '10px',
-                            padding: '8px 15px',
-                            backgroundColor: '#0d6efd',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        OK
-                    </button>
-                    <button
-                        onClick={handleModalClose}
-                        style={{
-                            padding: '8px 15px',
-                            backgroundColor: '#dc3545',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </Modal>
+                        />  
+                        <div style={{ textAlign: 'center' }}>
+                            <button
+                                onClick={handleModalSubmit}
+                                style={{
+                                    marginRight: '10px',
+                                    padding: '8px 15px',
+                                    backgroundColor: '#0d6efd',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '20px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                OK
+                            </button>
+                            <button
+                                onClick={handleModalClose}
+                                style={{
+                                    padding: '8px 15px',
+                                    backgroundColor: '#dc3545',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '20px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
 
             </div>
 
-            {selectedChart === 'area' && <StockAreaChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
-            {selectedChart === 'line' && <StockLineChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
-            {selectedChart === 'candles' && <StockCandleChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
-            {selectedChart === 'step area' && <StockStepChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
-            {selectedChart === 'hlc area' && <StockHLCChartContent stockCode={stockCode} chartData={chartData} loading={loading} />}
+            {selectedChart === 'area' && <StockAreaChartContent stockCode={stockCode} chartData={chartData} selectedIndicator={selectedIndicator} colorData={colorData} loading={loading} />}
+            {selectedChart === 'line' && <StockLineChartContent stockCode={stockCode} chartData={chartData} selectedIndicator={selectedIndicator} colorData={colorData} loading={loading} />}
+            {selectedChart === 'candles' && <StockCandleChartContent stockCode={stockCode} chartData={chartData} selectedIndicator={selectedIndicator} loading={loading} />}
+            {selectedChart === 'step area' && <StockStepChartContent stockCode={stockCode} chartData={chartData} selectedIndicator={selectedIndicator} colorData={colorData} loading={loading} />}
+            {selectedChart === 'hlc area' && <StockHLCChartContent stockCode={stockCode} chartData={chartData} selectedIndicator={selectedIndicator} loading={loading} />}
         </>
     );
 };
