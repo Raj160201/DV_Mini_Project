@@ -117,7 +117,7 @@ export default function Home() {
                                             <button type="submit" className="button button-a button-big button-rouded">
                                                 <div className="d-flex justify-content-around">
                                                     <div className="card-nifty">
-                                                        <img className="index-logo" crossorigin="" src={stock.Index_Logo} alt="" />
+                                                        <img className="index-logo" crossOrigin="" src={stock.Index_Logo} alt="" />
                                                     </div>
                                                     <div className="card-value justify-content-start text-start">
                                                         <h4><span className='text small fw-bold'>{stock.Index_Name}</span></h4>

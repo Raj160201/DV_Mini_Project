@@ -70,15 +70,166 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
             x.domain(d3.extent(chartData, d => d.Date));
             y.domain([0, d3.max(chartData, d => d.Close + (0.05 * d.Close))]);
 
-            // svg.append("g")
-            //     .attr("class", "grid")
-            //     .call(d3.axisLeft(y)
-            //         .tickSize(-width)
-            //         .tickFormat("")
-            //     )
-            //     .selectAll("line")
-            //     .style("stroke", "#ddd")
-            //     .style("stroke-opacity", 0.07);
+            const xMin = d3.min(chartData, d => {
+                return d['Date'];
+            });
+            const xMax = d3.max(chartData, d => {
+                return d['Date'];
+            });
+
+            const xScale = d3
+                .scaleTime()
+                .domain([xMin, xMax])
+                .range([0, width]);
+
+
+            const yMin = d3.min(chartData, d => {
+                return d['Close'];
+            });
+
+            const yMax = d3.max(chartData, d => {
+                return d['Close'];
+            });
+
+            const yScale = d3
+                .scaleLinear()
+                .domain([yMin - 5, yMax])
+                .range([height, 0]);
+
+            const movingAverage = (data, numberOfPricePoints) => {
+                return data.map((row, index, total) => {
+                    const start = Math.max(0, index - numberOfPricePoints);
+                    const end = index;
+                    const subset = total.slice(start, end + 1);
+                    const sum = subset.reduce((a, b) => {
+                        return a + b['Close'];
+                    }, 0);
+                    return {
+                        Date: row['Date'],
+                        average: sum / subset.length
+                    };
+                });
+            };
+
+            const expoMovingAverage = (data, numberOfPricePoints) => {
+                const alpha = 2 / (numberOfPricePoints + 1);
+                const ema = [];
+
+                let sum = 0;
+                for (let i = 0; i < Math.min(numberOfPricePoints, data.length); i++) {
+                    sum += data[i].Close;
+                }
+                ema.push({ Date: data[Math.min(numberOfPricePoints - 1, data.length - 1)].Date, expoAverage: sum / Math.min(numberOfPricePoints, data.length) });
+
+                for (let i = numberOfPricePoints; i < data.length; i++) {
+                    if (ema[i - numberOfPricePoints] === undefined) break; // Stop loop if ema[i - numberOfPricePoints] is undefined
+                    const prevEma = ema[i - numberOfPricePoints].expoAverage;
+                    const currentEma = (data[i].Close - prevEma) * alpha + prevEma;
+                    ema.push({ Date: data[i].Date, expoAverage: currentEma });
+                }
+                return ema;
+            };
+
+            const volWeightedAvg = (data) => {
+                let cumulativeTypicalPriceVolume = 0;
+                let cumulativeVolume = 0;
+
+                return data.map((row, index) => {
+                    const typicalPrice = (row.High + row.Low + row.Close) / 3;
+                    cumulativeTypicalPriceVolume += typicalPrice * row.Volume;
+                    cumulativeVolume += row.Volume;
+
+                    let vwap = null;
+
+                    if (cumulativeVolume !== 0) {
+                        vwap = cumulativeTypicalPriceVolume / cumulativeVolume;
+                    }
+
+                    return {
+                        Date: row.Date,
+                        VWAP: vwap
+                    };
+                });
+            };
+
+
+            // SIMPLE MOVING AVERAGE
+
+            const movingAverageData = movingAverage(chartData, 15);
+            const movingAverageLine = d3.line().x(d => x(d['Date'])).y(d => y(d['average'])).curve(d3.curveBasis);
+
+            const movingAveragePath = svg
+                .append('path')
+                .data([movingAverageData])
+                .style('fill', 'none')
+                .attr('id', 'movingAverageLine')
+                .attr('stroke', '#FF8900')
+                .attr('d', movingAverageLine);
+
+            // EXPONENTIAL MOVING AVERAGE
+
+            const expoMovingAverageData = expoMovingAverage(chartData, 15);
+            const expoMovingAverageLine = d3.line().x(d => x(d['Date'])).y(d => y(d['expoAverage'])).curve(d3.curveBasis);
+
+            const expoMovingAveragePath = svg
+                .append('path')
+                .data([expoMovingAverageData])
+                .style('fill', 'none')
+                .attr('id', 'expoMovingAverageLine')
+                .attr('stroke', '#fff')
+                .attr('d', expoMovingAverageLine);
+
+            // Volume-Weighted Average Price
+
+            const volWeightedAvgData = volWeightedAvg(chartData);
+            const volWeightedAvgLine = d3.line().x(d => x(d['Date'])).y(d => y(d['VWAP'])).curve(d3.curveBasis);
+
+            const volWeightedAvgPath = svg
+                .append('path')
+                .data([volWeightedAvgData])
+                .style('fill', 'none')
+                .attr('id', 'volWeightedAvgLine')
+                .attr('stroke', '#5b34eb')
+                .attr('d', volWeightedAvgLine);
+
+            // VOLUME BAR CHART
+
+            const volData = chartData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
+
+            const yMinVolume = d3.min(volData, d => {
+                return Math.min(d['Volume']);
+            });
+            console.log(yMinVolume);
+
+            const yMaxVolume = d3.max(volData, d => {
+                return Math.max(d['Volume']);
+            });
+
+            console.log(yMaxVolume);
+
+            const yVolumeScale = d3
+                .scaleLinear()
+                .domain([yMinVolume, yMaxVolume])
+                .range([height, 0]);
+
+            svg
+                .selectAll()
+                .data(volData)
+                .enter()
+                .append('rect')
+                .attr('x', d => xScale(d.Date))
+                .attr('y', d => yVolumeScale(d.Volume))
+                .attr('fill', (d, i) => {
+                    if (i === 0) {
+                        return '#03a678';
+                    } else {
+                        return volData[i - 1].Close > d.Close ? '#c0392b' : '#03a678';
+                    }
+                })
+                .attr('width', 1)
+                .attr('height', d => height - yVolumeScale(d.Volume));
+
+            // MAIN CHART COMPONENT
 
             svg.append("g")
                 .attr("class", "x-axis")
@@ -155,14 +306,14 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 .attr("height", height);
 
             listeningRect.on("mousemove", function (event) {
-                chartData.sort((a, b) => a.Date - b.Date)
+                const sortedChartData = [...chartData].sort((a, b) => a.Date - b.Date);
                 const [xCoord] = d3.pointer(event, this);
                 const bisectDate = d3.bisector(d => d.Date).left;
                 const x0 = x.invert(xCoord);
-                const i = bisectDate(chartData, x0, 1);
-                if (i >= chartData.length) return;
-                const d0 = chartData[i - 1 < 0 ? 0 : i - 1];
-                const d1 = chartData[i];
+                const i = bisectDate(sortedChartData, x0, 1);
+                if (i >= sortedChartData.length) return;
+                const d0 = sortedChartData[i - 1 < 0 ? 0 : i - 1];
+                const d1 = sortedChartData[i];
                 const d = x0 - d0.Date > d1.Date - x0 ? d1 : d0;
                 const xPos = x(d.Date);
                 const yPos = y(d.Close);
@@ -182,6 +333,10 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                     .style("top", `${yPos + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chart-price'), 10)}px`)
                     .html(`₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}`);
 
+                const movingAverageValue = movingAverageData.find(entry => entry.Date.getTime() === d.Date.getTime());
+                const expoMovingAverageValue = expoMovingAverageData.find(entry => entry.Date.getTime() === d.Date.getTime());
+                const volWeightedAvgValue = volWeightedAvgData.find(entry => entry.Date.getTime() === d.Date.getTime());
+
                 tooltipRawDate
                     .style("display", "block")
                     .style("left", `${xPos - 19}px`)
@@ -195,8 +350,12 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                         <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">High: ₹${d.High !== undefined ? d.High.toFixed(2) : 'N/A'}</p>
                         <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Low: ₹${d.Low !== undefined ? d.Low.toFixed(2) : 'N/A'}</p>
                         <p style="display: inline-block; color: ${d.Open > d.Close ? 'red' : 'green'};">Close: ₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}</p>
+                        <p style="text-align: left; margin-top: -15px; color: #FF8900;">SMA: ₹${movingAverageValue !== undefined ? movingAverageValue.average.toFixed(2) : 'N/A'}</p>
+                        <p style="text-align: left; margin-top: -15px; color: #FFF;">EMA: ₹${expoMovingAverageValue !== undefined ? expoMovingAverageValue.expoAverage.toFixed(2) : 'N/A'}</p>
+                        <p style="text-align: left; margin-top: -15px; color: #5b34eb;">VWAP: ₹${volWeightedAvgValue !== undefined ? volWeightedAvgValue.VWAP.toFixed(2) : 'N/A'}</p>
                     `);
             });
+            // volWeightedAvg
 
             listeningRect.on("mouseleave", function () {
                 circle.transition().duration(50).attr("r", 0);
@@ -226,6 +385,18 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                 svg.select(".line").attr("d", line(filteredData));
                 svg.select(".area").attr("d", area(filteredData));
 
+                const xMin = d3.min(filteredData, d => d['Date']);
+                const xMax = d3.max(filteredData, d => d['Date']);
+                const yMin = d3.min(filteredData, d => d['Close']);
+                const yMax = d3.max(filteredData, d => d['Close']);
+
+                xScale.domain([xMin, xMax]);
+                yScale.domain([yMin - 5, yMax]);
+
+                const updatedMovingAverageData = movingAverage(filteredData, 15);
+                const updatedExpoMovingAverageData = expoMovingAverage(filteredData, 15);
+                const updatedVolWeightedAvgData = volWeightedAvg(filteredData);
+
                 svg.select(".x-axis")
                     .transition()
                     .duration(300)
@@ -242,6 +413,15 @@ const StockAreaChartContent = ({ stockCode, chartData, colorData, loading }) => 
                             if (d <= 0) return "";
                             return `₹${d.toFixed(2)}`;
                         }));
+
+                movingAveragePath.data([updatedMovingAverageData])
+                    .attr('d', movingAverageLine);
+
+                expoMovingAveragePath.data([updatedExpoMovingAverageData])
+                    .attr('d', expoMovingAverageLine);
+
+                volWeightedAvgPath.data([updatedVolWeightedAvgData])
+                    .attr('d', volWeightedAvgLine);
             });
 
             const gRange = d3
