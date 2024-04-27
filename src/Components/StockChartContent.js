@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Modal from 'react-modal';
 import StockLineChartContent from './StockLineChartContent';
 import StockCandleChartContent from './StockCandleChartContent';
 import StockAreaChartContent from './StockAreaChartContent';
@@ -7,8 +8,9 @@ import StockHLCChartContent from './StockHLCChartContent';
 import Loader from './Loader';
 import { MDBDropdown, MDBDropdownMenu, MDBDropdownToggle, MDBDropdownItem } from 'mdb-react-ui-kit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp, faChartArea, faStairs } from '@fortawesome/free-solid-svg-icons';
+import { faArrowTrendUp, faChartArea, faStairs,faCheckSquare  } from '@fortawesome/free-solid-svg-icons';
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
+Modal.setAppElement('#root');
 
 const StockChartContent = ({ companyIsin, stockCode }) => {
     const [chartData, setChartData] = useState(null);
@@ -16,6 +18,11 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const [loading, setLoading] = useState(true);
     const [selectedChart, setSelectedChart] = useState('area');
     const [selectedTime, setSelectedTime] = useState('month');
+    const [selectedIndicator, setSelectedIndicator] = useState([]);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [variablePeriod, setVariablePeriod] = useState('');
+    const [selectedIndicatorWithPeriod, setSelectedIndicatorWithPeriod] = useState([]);
+
     const [selectedChartIcon, setChartIcon] = useState(faChartArea);
 
     const today = new Date().toISOString().split('T')[0];
@@ -72,7 +79,36 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const handleTimeChange = (timePeriod) => {
         setSelectedTime(timePeriod);
     };
+    useEffect(() => {
+        console.log('Indicator:', selectedIndicator);
+    }, [selectedIndicator]);
 
+    const handleIndicator = (indicator) => {
+        const index = selectedIndicator.findIndex(item => item.indicator === indicator);
+        if (index !== -1) {
+            const updatedIndicator = [...selectedIndicator];
+            updatedIndicator.splice(index, 1);
+            setSelectedIndicator(updatedIndicator);
+        } else {
+            setModalIsOpen(true);
+            setSelectedIndicatorWithPeriod({ indicator });
+        }
+    };
+    const handleModalClose = () => {
+        setModalIsOpen(false);
+        setVariablePeriod('');
+    };
+    const handleModalSubmit = () => {
+        if (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0) {
+            alert('Please enter a valid positive number for the period.');
+            return;
+        }
+        const updatedIndicator = [...selectedIndicator, { ...selectedIndicatorWithPeriod, period: parseInt(variablePeriod) }];
+        setSelectedIndicator(updatedIndicator);
+        setModalIsOpen(false);
+        setVariablePeriod('');
+    };
+    
     return (
         <>
             {loading && <Loader />}
@@ -141,6 +177,126 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                         </MDBDropdownMenu>
                     </MDBDropdown>
                 </div>
+                <div className="col chart-col" style={{ flex: '1', maxWidth: 'max-content', paddingTop: '15px', marginLeft: '10px' }}>
+                <MDBDropdown>
+                    <MDBDropdownToggle size='sm'>
+                        {'Select Indicator'}
+                    </MDBDropdownToggle>
+                    <MDBDropdownMenu dark>
+                    <MDBDropdownItem
+        link
+        aria-current={selectedIndicator.some(item => item.indicator === 'SMA')}
+        childTag='button'
+        onClick={() => handleIndicator('SMA')}
+    >
+        <FontAwesomeIcon
+            icon={faCheckSquare}
+            style={{
+                marginRight: '7px',
+                color: selectedIndicator.some(item => item.indicator === 'SMA') ? '#0d6efd' : 'inherit'
+            }}
+        />
+        SMA
+    </MDBDropdownItem>
+    <MDBDropdownItem
+        link
+        aria-current={selectedIndicator.some(item => item.indicator === 'EMA')}
+        childTag='button'
+        onClick={() => handleIndicator('EMA')}
+    >
+        <FontAwesomeIcon
+            icon={faCheckSquare}
+            style={{
+                marginRight: '7px',
+                color: selectedIndicator.some(item => item.indicator === 'EMA') ? '#0d6efd' : 'inherit'
+            }}
+        />
+        EMA
+    </MDBDropdownItem>
+    <MDBDropdownItem
+        link
+        aria-current={selectedIndicator.some(item => item.indicator === 'VO')}
+        childTag='button'
+        onClick={() => handleIndicator('VO')}
+    >
+        <FontAwesomeIcon
+            icon={faCheckSquare}
+            style={{
+                marginRight: '7px',
+                color: selectedIndicator.some(item => item.indicator === 'VO') ? '#0d6efd' : 'inherit'
+            }}
+        />
+        VO
+    </MDBDropdownItem>
+                    </MDBDropdownMenu>
+                </MDBDropdown>
+            </div>
+            <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={handleModalClose}
+            style={{
+                overlay: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                },
+                content: {
+                    width: '350px',
+                    height: '240px',
+                    margin: 'auto',
+                    backgroundColor: 'black',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                },
+            }}
+        >
+            <div style={{ padding: '20px' }}>
+                <h2 style={{ marginBottom: '15px', color: '#fff' }}>Enter Period</h2>
+
+                <input
+                    type="number"
+                    placeholder="Period"
+                    value={variablePeriod}
+                    onChange={(e) => setVariablePeriod(e.target.value)}
+                    style={{
+                        marginBottom: '20px',
+                        width: '100%',
+                        padding: '8px',
+                        boxSizing: 'border-box',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                    }}
+                />
+                <div style={{ textAlign: 'center' }}>
+                    <button
+                        onClick={handleModalSubmit}
+                        style={{
+                            marginRight: '10px',
+                            padding: '8px 15px',
+                            backgroundColor: '#0d6efd',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        OK
+                    </button>
+                    <button
+                        onClick={handleModalClose}
+                        style={{
+                            padding: '8px 15px',
+                            backgroundColor: '#dc3545',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </Modal>
+
             </div>
 
             {selectedChart === 'area' && <StockAreaChartContent stockCode={stockCode} chartData={chartData} colorData={colorData} loading={loading} />}
