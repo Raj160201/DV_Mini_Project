@@ -125,7 +125,7 @@ export default function Home() {
                                                             {showPrice ? (
                                                                 <>{stock.LTP} <span className="text small pt-1 ps-0" style={{ fontWeight: '200' }}>INR</span></>
                                                             ) : (
-                                                                <>{stock.ChangePercentage}% <span className="text small pt-1 ps-0" style={{ fontWeight: '400' }}>{stock.Color === 'success' ? `+${stock.Change}` : `-${stock.Change}`}</span></>
+                                                                <>{stock.ChangePercentage}% <span className="text small pt-1 ps-0" style={{ fontWeight: '400' }}>{stock.Color === 'success' ? `+${stock.Change}` : `${stock.Change}`}</span></>
                                                             )}
                                                         </animated.span>
                                                     </div>

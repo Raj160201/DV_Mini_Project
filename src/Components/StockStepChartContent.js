@@ -7,6 +7,15 @@ const StockStepChartContent = ({ stockCode, chartData, colorData, selectedIndica
         let movingAverageData, expoMovingAverageData, volWeightedAvgData;
         let movingAverageValue, expoMovingAverageValue, volWeightedAvgValue;
 
+        function formatVolume(volume) {
+            if (volume === undefined) return 'N/A';
+            if (volume >= 1e6) {
+                return (volume / 1e6).toFixed(3) + 'M';
+            } else {
+                return volume;
+            }
+        }
+
         const renderChart = async () => {
             const margin = { top: 40, right: 68, bottom: 40, left: 10 };
             const width = 1080 - margin.left - margin.right;
@@ -97,17 +106,20 @@ const StockStepChartContent = ({ stockCode, chartData, colorData, selectedIndica
                 .range([height, 0]);
 
             const movingAverage = (data, numberOfPricePoints) => {
-                return data.map((d, i) => {
-                    if (i < numberOfPricePoints - 1) return null;
-                    const subset = data.slice(i - numberOfPricePoints + 1, i + 1);
-                    const sum = subset.reduce((acc, cur) => acc + cur.Close, 0);
+                data.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+                return data.map((row, index, total) => {
+                    const start = Math.max(0, index - numberOfPricePoints);
+                    const end = index;
+                    const subset = total.slice(start, end + 1);
+                    const sum = subset.reduce((a, b) => {
+                        return a + b['Close'];
+                    }, 0);
                     return {
-                        Date: data[i]['Date'],
-                        average: sum / numberOfPricePoints
+                        Date: row['Date'],
+                        average: sum / subset.length
                     };
                 });
             };
-
 
             const movingAverageLine = d3.line()
                 .x(d => x(d.Date))
@@ -118,6 +130,7 @@ const StockStepChartContent = ({ stockCode, chartData, colorData, selectedIndica
             const expoMovingAverage = (data, numberOfPricePoints) => {
                 const alpha = 2 / (numberOfPricePoints + 1);
                 const ema = [];
+                data.sort((a, b) => new Date(a.Date) - new Date(b.Date));
 
                 let sum = 0;
                 for (let i = 0; i < Math.min(numberOfPricePoints, data.length); i++) {
@@ -142,6 +155,7 @@ const StockStepChartContent = ({ stockCode, chartData, colorData, selectedIndica
             const volWeightedAvg = (data) => {
                 let cumulativeTypicalPriceVolume = 0;
                 let cumulativeVolume = 0;
+                data.sort((a, b) => new Date(a.Date) - new Date(b.Date));
 
                 return data.map((row, index) => {
                     const typicalPrice = (row.High + row.Low + row.Close) / 3;
@@ -337,6 +351,9 @@ const StockStepChartContent = ({ stockCode, chartData, colorData, selectedIndica
                     <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">High: ₹${d.High !== undefined ? d.High.toFixed(2) : 'N/A'}</p>
                     <p style="display: inline-block; margin-right: 20px; color: ${d.Open > d.Close ? 'red' : 'green'};">Low: ₹${d.Low !== undefined ? d.Low.toFixed(2) : 'N/A'}</p>
                     <p style="display: inline-block; color: ${d.Open > d.Close ? 'red' : 'green'};">Close: ₹${d.Close !== undefined ? d.Close.toFixed(2) : 'N/A'}</p>
+                    <p style="text-align: left; margin-top: -15px; color: ${d.Open > d.Close ? 'red' : 'green'};">
+                        Volume: ${formatVolume(d.Volume)}
+                    </p>
                     <p style="text-align: left; margin-top: -15px; color: ${selectedIndicator.find(indicator => indicator.indicator === 'SMA')?.color || '#FFFFFF'};">
                         ${selectedIndicator.some(indicator => indicator.indicator === 'SMA') ?
                         `SMA: ₹${movingAverageValue !== undefined ? movingAverageValue.average.toFixed(2) : 'N/A'}` : ''}
@@ -447,7 +464,7 @@ const StockStepChartContent = ({ stockCode, chartData, colorData, selectedIndica
             d3.select("#slider-range").select("svg").remove();
             d3.select("#slider-range").select("svg").remove();
         };
-    }, [stockCode, chartData]);
+    }, [stockCode, chartData, selectedIndicator, colorData]);
     return (
         <>
             <div id="chart-container"></div>
