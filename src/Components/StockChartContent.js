@@ -22,7 +22,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [variablePeriod, setVariablePeriod] = useState('');
     const [selectedIndicatorWithPeriod, setSelectedIndicatorWithPeriod] = useState([]);
-    const [selectedColor, setSelectedColor] = useState('Red');
+    const [selectedColor, setSelectedColor] = useState('#FFFF00');
     const [selectedChartIcon, setChartIcon] = useState(faChartArea);
 
     const today = new Date().toISOString().split('T')[0];
@@ -264,20 +264,20 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                                 border: '1px solid #ccc',
                                 borderRadius: '4px',
                             }}
-                />
-                <input 
-                    type="color"
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    style={{
-                        marginBottom: '20px',
-                        width: '100%',
-                        padding: '8px',
-                        boxSizing: 'border-box',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                    }}
-                        />  
+                        />
+                        <input
+                            type="color"
+                            value={selectedColor}
+                            onChange={(e) => setSelectedColor(e.target.value)}
+                            style={{
+                                marginBottom: '20px',
+                                width: '100%',
+                                padding: '8px',
+                                boxSizing: 'border-box',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                            }}
+                        />
                         <div style={{ textAlign: 'center' }}>
                             <button
                                 onClick={handleModalSubmit}
