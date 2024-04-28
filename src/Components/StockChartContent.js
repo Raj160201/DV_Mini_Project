@@ -88,7 +88,13 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
             updatedIndicator.splice(index, 1);
             setSelectedIndicator(updatedIndicator);
         } else {
-            setModalIsOpen(true);
+            if(indicator !== 'Volume') {
+                setModalIsOpen(true);
+            }
+            else{
+                const updatedIndicator = [...selectedIndicator, { indicator, color: selectedColor }];
+                setSelectedIndicator(updatedIndicator);
+            }
             setSelectedIndicatorWithPeriod({ indicator });
         }
     };
@@ -100,7 +106,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     };
 
     const handleModalSubmit = () => {
-        if (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0) {
+        if (selectedIndicatorWithPeriod.indicator!=='VWAP' && (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0)) {
             alert('Please enter a valid positive number for the period.');
             return;
         }
@@ -110,6 +116,9 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
         setVariablePeriod('');
         setSelectedColor('Red');
     };
+    useEffect(() => {
+        console.log(selectedIndicator);
+    }, [selectedIndicator]);
 
     return (
         <>
@@ -257,7 +266,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                         },
                         content: {
                             width: '350px',
-                            height: '300px',
+                            height: selectedIndicatorWithPeriod.indicator === 'VWAP' ? '250px' : '300px',
                             margin: 'auto',
                             backgroundColor: 'black',
                             borderRadius: '8px',
@@ -267,21 +276,22 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                 >
                     <div style={{ padding: '20px' }}>
                         <h2 style={{ marginBottom: '25px', color: '#fff' }}>{selectedIndicatorWithPeriod.indicator}</h2>
-
-                        <input
-                            type="number"
-                            placeholder="Period"
-                            value={variablePeriod}
-                            onChange={(e) => setVariablePeriod(e.target.value)}
-                            style={{
-                                marginBottom: '20px',
-                                width: '100%',
-                                padding: '8px',
-                                boxSizing: 'border-box',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px',
-                            }}
-                        />
+                        {selectedIndicatorWithPeriod.indicator !== 'VWAP' && (
+    <input
+        type="number"
+        placeholder="Period"
+        value={variablePeriod}
+        onChange={(e) => setVariablePeriod(e.target.value)}
+        style={{
+            marginBottom: '20px',
+            width: '100%',
+            padding: '8px',
+            boxSizing: 'border-box',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+        }}
+    />
+)}
                         <input
                             type="color"
                             value={selectedColor}
