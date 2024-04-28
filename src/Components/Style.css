@@ -103,7 +103,7 @@
 
 rect {
     pointer-events: all;
-    fill-opacity: 0;
+    fill-opacity: 0.3;
     stroke-opacity: 0;
     z-index: 1;
 }

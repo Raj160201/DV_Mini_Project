@@ -225,41 +225,38 @@ const StockAreaChartContent = ({ stockCode, chartData, selectedIndicator, colorD
             }
 
             // VOLUME BAR CHART
-
-            const volData = chartData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
-
-            const yMinVolume = d3.min(volData, d => {
-                return Math.min(d['Volume']);
-            });
-
-            const yMaxVolume = d3.max(volData, d => {
-                return Math.max(d['Volume']);
-            });
+            const sortedChartData = [...chartData].sort((a, b) => a.Date - b.Date);
+            const volData = sortedChartData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
 
             const yVolumeScale = d3
                 .scaleLinear()
-                .domain([yMinVolume, yMaxVolume])
+                .domain([0, 7 * d3.max(volData, d => d['Volume'])])
                 .range([height, 0]);
 
-            svg
-                .selectAll()
-                .data(volData)
-                .enter()
-                .append('rect')
-                .attr('x', d => xScale(d.Date))
-                .attr('y', d => yVolumeScale(d.Volume))
-                .attr('fill', (d, i) => {
-                    if (i === 0) {
-                        return '#03a678';
-                    } else {
-                        return volData[i - 1].Close > d.Close ? '#c0392b' : '#03a678';
-                    }
-                })
-                .attr('width', 1)
-                .attr('height', d => height - yVolumeScale(d.Volume));
+            const createVolumeBars = (svg, volData, xScale, yVolumeScale) => {
+                svg
+                    .selectAll('.volume-bar')
+                    .data(volData)
+                    .enter()
+                    .append('rect')
+                    .attr('class', 'volume-bar')
+                    .attr('x', d => xScale(d.Date))
+                    .attr('y', d => yVolumeScale(d.Volume))
+                    .attr('fill', (d, i) => {
+                        if (i === 0) {
+                            return '#03a678';
+                        } else {
+                            console.log(volData[i - 1].Close, d.Close, d.Date, d.Volume);
+                            return volData[i - 1].Close > d.Close ? '#e87f2a' : '#03a678';
+                        }
+                    })
+                    .attr('width', 3)
+                    .attr('height', d => Math.abs(yVolumeScale(d.Volume) - yVolumeScale(0)));
+            };
+
+            createVolumeBars(svg, volData, xScale, yVolumeScale);
 
             // MAIN CHART COMPONENT
-
             svg.append("g")
                 .attr("class", "x-axis")
                 .attr("transform", `translate(0,${height})`)
@@ -426,9 +423,11 @@ const StockAreaChartContent = ({ stockCode, chartData, selectedIndicator, colorD
                 .fill('#85bb65');
 
             sliderRange.on('onchange', val => {
+                svg.selectAll('.volume-bar').remove();
                 svg.select('#movingAverageLine').remove();
                 svg.select('#expoMovingAverageLine').remove();
                 svg.select('#volWeightedAvgLine').remove();
+
                 const filteredData = chartData.filter(d => d.Date >= val[0] && d.Date <= val[1]);
                 x.domain(d3.extent(filteredData, d => d.Date));
                 y.domain([d3.min(filteredData, d => d.Low - (0.05 * d.Low)), d3.max(filteredData, d => d.High + (0.05 * d.High))]);
@@ -471,6 +470,8 @@ const StockAreaChartContent = ({ stockCode, chartData, selectedIndicator, colorD
 
                 const volWeightedAvgPath = selectedIndicator.some(indicator => indicator.indicator === 'VWAP') ? svg.append('path').data([updatedVolWeightedAvgData]).style('fill', 'none').attr('id', 'volWeightedAvgLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'VWAP').color).attr('d', volWeightedAvgLine) : null;
 
+                const volData = filteredData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
+                createVolumeBars(svg, volData, xScale, yVolumeScale);
             });
 
             const gRange = d3

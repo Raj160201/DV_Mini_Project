@@ -201,6 +201,39 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
                     .attr('d', volWeightedAvgLine);
             }
 
+            // VOLUME BAR CHART
+            const sortedChartData = [...chartData].sort((a, b) => a.Date - b.Date);
+            const volData = sortedChartData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
+
+            const yVolumeScale = d3
+                .scaleLinear()
+                .domain([0, 7 * d3.max(volData, d => d['Volume'])])
+                .range([height, 0]);
+
+            const createVolumeBars = (svg, volData, xScale, yVolumeScale) => {
+                svg
+                    .selectAll('.volume-bar')
+                    .data(volData)
+                    .enter()
+                    .append('rect')
+                    .attr('class', 'volume-bar')
+                    .attr('x', d => xScale(d.Date))
+                    .attr('y', d => yVolumeScale(d.Volume))
+                    .attr('fill', (d, i) => {
+                        if (i === 0) {
+                            return '#03a678';
+                        } else {
+                            console.log(volData[i - 1].Close, d.Close, d.Date, d.Volume);
+                            return volData[i - 1].Close > d.Close ? '#e87f2a' : '#03a678';
+                        }
+                    })
+                    .attr('width', 3)
+                    .attr('height', d => Math.abs(yVolumeScale(d.Volume) - yVolumeScale(0)));
+            };
+
+            createVolumeBars(svg, volData, xScale, yVolumeScale);
+
+
             const candleWidth = 1;
 
             const candlestickLines = svg.selectAll(".candlestick-line")
@@ -380,6 +413,7 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
                 .fill('#85bb65');
 
             sliderRange.on('onchange', val => {
+                svg.selectAll('.volume-bar').remove();
                 svg.select('#movingAverageLine').remove();
                 svg.select('#expoMovingAverageLine').remove();
                 svg.select('#volWeightedAvgLine').remove();
@@ -444,6 +478,9 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
                 const expoMovingAveragePath = selectedIndicator.some(indicator => indicator.indicator === 'EMA') ? svg.append('path').data([updatedExpoMovingAverageData]).style('fill', 'none').attr('id', 'expoMovingAverageLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'EMA').color).attr('d', expoMovingAverageLine) : null;
 
                 const volWeightedAvgPath = selectedIndicator.some(indicator => indicator.indicator === 'VWAP') ? svg.append('path').data([updatedVolWeightedAvgData]).style('fill', 'none').attr('id', 'volWeightedAvgLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'VWAP').color).attr('d', volWeightedAvgLine) : null;
+
+                const volData = filteredData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
+                createVolumeBars(svg, volData, xScale, yVolumeScale);
             });
 
             const gRange = d3
