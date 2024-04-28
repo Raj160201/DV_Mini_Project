@@ -92,11 +92,13 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
             setSelectedIndicatorWithPeriod({ indicator });
         }
     };
+
     const handleModalClose = () => {
         setModalIsOpen(false);
         setVariablePeriod('');
         setSelectedColor('Red');
     };
+
     const handleModalSubmit = () => {
         if (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0) {
             alert('Please enter a valid positive number for the period.');
@@ -228,6 +230,21 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                                 />
                                 VWAP
                             </MDBDropdownItem>
+                            <MDBDropdownItem
+                                link
+                                aria-current={selectedIndicator.some(item => item.indicator === 'Volume')}
+                                childTag='button'
+                                onClick={() => handleIndicator('Volume')}
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCheckSquare}
+                                    style={{
+                                        marginRight: '7px',
+                                        color: selectedIndicator.some(item => item.indicator === 'Volume') ? '#0d6efd' : 'inherit'
+                                    }}
+                                />
+                                Volume
+                            </MDBDropdownItem>
                         </MDBDropdownMenu>
                     </MDBDropdown>
                 </div>
@@ -249,7 +266,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                     }}
                 >
                     <div style={{ padding: '20px' }}>
-                        <h2 style={{ marginBottom: '15px', color: '#fff' }}>Enter Period</h2>
+                        <h2 style={{ marginBottom: '25px', color: '#fff' }}>{selectedIndicatorWithPeriod.indicator}</h2>
 
                         <input
                             type="number"

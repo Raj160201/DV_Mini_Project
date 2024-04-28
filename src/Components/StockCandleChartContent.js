@@ -202,13 +202,6 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
             }
 
             // VOLUME BAR CHART
-            const sortedChartData = [...chartData].sort((a, b) => a.Date - b.Date);
-            const volData = sortedChartData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
-
-            const yVolumeScale = d3
-                .scaleLinear()
-                .domain([0, 7 * d3.max(volData, d => d['Volume'])])
-                .range([height, 0]);
 
             const createVolumeBars = (svg, volData, xScale, yVolumeScale) => {
                 svg
@@ -223,7 +216,6 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
                         if (i === 0) {
                             return '#03a678';
                         } else {
-                            console.log(volData[i - 1].Close, d.Close, d.Date, d.Volume);
                             return volData[i - 1].Close > d.Close ? '#e87f2a' : '#03a678';
                         }
                     })
@@ -231,8 +223,15 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
                     .attr('height', d => Math.abs(yVolumeScale(d.Volume) - yVolumeScale(0)));
             };
 
-            createVolumeBars(svg, volData, xScale, yVolumeScale);
-
+            if (selectedIndicator.some(indicator => indicator.indicator === 'Volume')) {
+                const sortedChartData = [...chartData].sort((a, b) => a.Date - b.Date);
+                const volData = sortedChartData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
+                const yVolumeScale = d3
+                    .scaleLinear()
+                    .domain([0, 7 * d3.max(volData, d => d['Volume'])])
+                    .range([height, 0]);
+                createVolumeBars(svg, volData, xScale, yVolumeScale);
+            }
 
             const candleWidth = 1;
 
@@ -479,8 +478,14 @@ const StockCandleChartContent = ({ stockCode, chartData, selectedIndicator, load
 
                 const volWeightedAvgPath = selectedIndicator.some(indicator => indicator.indicator === 'VWAP') ? svg.append('path').data([updatedVolWeightedAvgData]).style('fill', 'none').attr('id', 'volWeightedAvgLine').attr('stroke', selectedIndicator.find(indicator => indicator.indicator === 'VWAP').color).attr('d', volWeightedAvgLine) : null;
 
-                const volData = filteredData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
-                createVolumeBars(svg, volData, xScale, yVolumeScale);
+                if (selectedIndicator.some(indicator => indicator.indicator === 'Volume')) {
+                    const volData = filteredData.filter(d => d['Volume'] !== null && d['Volume'] !== 0);
+                    const yVolumeScale = d3
+                        .scaleLinear()
+                        .domain([0, 7 * d3.max(volData, d => d['Volume'])])
+                        .range([height, 0]);
+                    createVolumeBars(svg, volData, xScale, yVolumeScale);
+                }
             });
 
             const gRange = d3
