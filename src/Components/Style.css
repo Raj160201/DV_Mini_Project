@@ -452,3 +452,15 @@ rect {
 .container {
     margin-left: 70px;
 }
+
+.section-title {
+    padding-bottom: 5px;
+}
+
+.section-title p {
+    margin-top: 35px;
+    font-size: 40px;
+    font-weight: 700;
+    font-family: "Playfair Display", serif;
+    color: #cda45e;
+}

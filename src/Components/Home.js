@@ -11,6 +11,7 @@ import ScrollToSomeSection from './ScrollToSomeSection';
 import { useSpring, animated } from '@react-spring/web'
 import indexApi from '../Utils/apis/index_api';
 import indexJson from '../Utils/data/short_index.json';
+import Sector from './Sector';
 
 export default function Home() {
     const location = useLocation();
@@ -150,6 +151,7 @@ export default function Home() {
                         </Suspense>
                     </div>
                     <div className="col-md-12">
+                        <Sector />
                         <IPONews />
                         <News />
                     </div>

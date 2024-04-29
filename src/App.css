@@ -2,6 +2,7 @@
     --chart-price: 1034px;
     --chart-date: 1022px;
     --chart-ohlc: 1052px;
+    --sector-width: 2000px;
 }
 
 @media screen and (max-width: 1600px) {
@@ -9,6 +10,7 @@
         --chart-price: 976px;
         --chart-date: 956px;
         --chart-ohlc: 986px;
+        --sector-width: 2000px;
     }
 }
 
@@ -17,6 +19,7 @@
         --chart-price: 902px;
         --chart-date: 892px;
         --chart-ohlc: 920px;
+        --sector-width: 2050px;
     }
 }
 
@@ -25,6 +28,7 @@
         --chart-price: 970px;
         --chart-date: 960px;
         --chart-ohlc: 988px;
+        --sector-width: 2000px;
     }
 }
 
