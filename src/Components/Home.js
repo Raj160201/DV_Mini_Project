@@ -152,8 +152,8 @@ export default function Home() {
                     </div>
                     <div className="col-md-12">
                         <Sector />
-                        <IPONews />
-                        <News />
+                        {/* <IPONews />
+                        <News /> */}
                     </div>
                 </div>
             </div >

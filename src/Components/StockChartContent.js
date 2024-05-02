@@ -46,7 +46,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
             }));
 
             const latestCandle = data[0];
-            const secondLatestCandle = data[1];
+            const secondLatestCandle = data[data.length - 1];
 
             let color;
             if (latestCandle.Close > secondLatestCandle.Close) {
@@ -88,10 +88,10 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
             updatedIndicator.splice(index, 1);
             setSelectedIndicator(updatedIndicator);
         } else {
-            if(indicator !== 'Volume') {
+            if (indicator !== 'Volume') {
                 setModalIsOpen(true);
             }
-            else{
+            else {
                 const updatedIndicator = [...selectedIndicator, { indicator, color: selectedColor }];
                 setSelectedIndicator(updatedIndicator);
             }
@@ -106,7 +106,7 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
     };
 
     const handleModalSubmit = () => {
-        if (selectedIndicatorWithPeriod.indicator!=='VWAP' && (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0)) {
+        if (selectedIndicatorWithPeriod.indicator !== 'VWAP' && (!variablePeriod || isNaN(variablePeriod) || parseInt(variablePeriod) <= 0)) {
             alert('Please enter a valid positive number for the period.');
             return;
         }
@@ -277,21 +277,21 @@ const StockChartContent = ({ companyIsin, stockCode }) => {
                     <div style={{ padding: '20px' }}>
                         <h2 style={{ marginBottom: '25px', color: '#fff' }}>{selectedIndicatorWithPeriod.indicator}</h2>
                         {selectedIndicatorWithPeriod.indicator !== 'VWAP' && (
-    <input
-        type="number"
-        placeholder="Period"
-        value={variablePeriod}
-        onChange={(e) => setVariablePeriod(e.target.value)}
-        style={{
-            marginBottom: '20px',
-            width: '100%',
-            padding: '8px',
-            boxSizing: 'border-box',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-        }}
-    />
-)}
+                            <input
+                                type="number"
+                                placeholder="Period"
+                                value={variablePeriod}
+                                onChange={(e) => setVariablePeriod(e.target.value)}
+                                style={{
+                                    marginBottom: '20px',
+                                    width: '100%',
+                                    padding: '8px',
+                                    boxSizing: 'border-box',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                }}
+                            />
+                        )}
                         <input
                             type="color"
                             value={selectedColor}
